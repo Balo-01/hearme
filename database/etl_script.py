@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Oracle connection settings from .env
 DB_CONFIG = {
     'user': os.getenv('DB_USER'),
     'password': os.getenv('DB_PASSWORD'),
@@ -16,18 +15,18 @@ DB_CONFIG = {
 }
 
 CSV_PATH = os.getenv('CSV_PATH', 'csv/')
-
+MAX_NUMBER_OF_PATIENTS = 15
 
 def clean_name(name):
     """Remove non-English alphabet characters from name."""
     if pd.isna(name):
         return None
-    return re.sub(r'[^a-zA-Z]', '', str(name))
+    return re.sub(r'[^a-zA-Z]', '', str(name)).capitalize()
 
 
 def generate_contact_number():
-    """Generate a random phone number."""
-    return f"+1-{random.randint(200, 999)}-{random.randint(100, 999)}-{random.randint(1000, 9999)}"
+    """Generate a random Romanian phone number in international format."""
+    return f"+40 7{random.randint(0, 9)} {random.randint(100, 999)} {random.randint(100, 999)}"
 
 
 def parse_date(date_str):
@@ -46,16 +45,15 @@ def parse_date(date_str):
 
 def load_patients(connection):
     """Load patients from CSV to database."""
-    print("Loading patients...")
     df = pd.read_csv(f'{CSV_PATH}patients.csv')
-    
+
+    number_of_patients = 0
     inserted_ids = set()
     cursor = connection.cursor()
     
     for _, row in df.iterrows():
         birthdate = parse_date(row['BIRTHDATE'])
         if birthdate is None:
-            print(f"  Skipping patient {row['Id']} - no birthdate")
             continue
         
         patient_id = row['Id']
@@ -70,8 +68,12 @@ def load_patients(connection):
                 VALUES (:1, :2, :3, :4, :5, :6)
             """, [patient_id, birthdate, firstname, lastname, gender, contact_number])
             inserted_ids.add(patient_id)
+            number_of_patients += 1
         except oracledb.IntegrityError as e:
             print(f"  Skipping duplicate patient {patient_id}")
+        
+        if number_of_patients == MAX_NUMBER_OF_PATIENTS:
+            break  
     
     connection.commit()
     print(f"  Inserted {len(inserted_ids)} patients")
@@ -80,7 +82,6 @@ def load_patients(connection):
 
 def load_procedures(connection, valid_patient_ids):
     """Load procedures from CSV to database."""
-    print("Loading procedures...")
     df = pd.read_csv(f'{CSV_PATH}procedures.csv')
     
     cursor = connection.cursor()
@@ -110,7 +111,6 @@ def load_procedures(connection, valid_patient_ids):
 
 def load_observations(connection, valid_patient_ids):
     """Load observations from CSV to database."""
-    print("Loading observations...")
     df = pd.read_csv(f'{CSV_PATH}observations.csv')
     
     cursor = connection.cursor()
@@ -142,7 +142,6 @@ def load_observations(connection, valid_patient_ids):
 
 def load_medications(connection, valid_patient_ids):
     """Load medications from CSV to database."""
-    print("Loading medications...")
     df = pd.read_csv(f'{CSV_PATH}medications.csv')
     
     cursor = connection.cursor()
@@ -175,7 +174,6 @@ def load_medications(connection, valid_patient_ids):
 
 def load_conditions(connection, valid_patient_ids):
     """Load conditions from CSV to database."""
-    print("Loading conditions...")
     df = pd.read_csv(f'{CSV_PATH}conditions.csv')
     
     cursor = connection.cursor()
@@ -202,7 +200,6 @@ def load_conditions(connection, valid_patient_ids):
 
 def load_allergies(connection, valid_patient_ids):
     """Load allergies from CSV to database."""
-    print("Loading allergies...")
     df = pd.read_csv(f'{CSV_PATH}allergies.csv')
     
     cursor = connection.cursor()
@@ -226,9 +223,7 @@ def load_allergies(connection, valid_patient_ids):
 
 
 def main():
-    print("Connecting to Oracle database...")
     connection = oracledb.connect(**DB_CONFIG)
-    print("Connected successfully!")
     
     try:
         # Load patients first to get valid IDs
@@ -241,7 +236,6 @@ def main():
         load_conditions(connection, valid_patient_ids)
         load_allergies(connection, valid_patient_ids)
         
-        print("\nETL completed successfully!")
     finally:
         connection.close()
 
