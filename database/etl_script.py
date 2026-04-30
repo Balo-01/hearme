@@ -16,6 +16,16 @@ DB_CONFIG = {
 
 CSV_PATH = os.getenv('CSV_PATH', 'csv/')
 MAX_NUMBER_OF_PATIENTS = 15
+DATE_YEAR_OFFSET = 5
+
+
+def add_years_safe(date_value, years):
+    """Add years to a date, adjusting leap-day dates to Feb 28 when needed."""
+    try:
+        return date_value.replace(year=date_value.year + years)
+    except ValueError:
+        # Handles Feb 29 when target year is not leap.
+        return date_value.replace(month=2, day=28, year=date_value.year + years)
 
 def clean_name(name):
     """Remove non-English alphabet characters from name."""
@@ -36,9 +46,11 @@ def parse_date(date_str):
     try:
         # Handle ISO format with time
         if 'T' in str(date_str):
-            return datetime.fromisoformat(str(date_str).replace('Z', '+00:00')).date()
+            parsed_date = datetime.fromisoformat(str(date_str).replace('Z', '+00:00')).date()
+            return add_years_safe(parsed_date, DATE_YEAR_OFFSET)
         # Handle date only format
-        return datetime.strptime(str(date_str), '%Y-%m-%d').date()
+        parsed_date = datetime.strptime(str(date_str), '%Y-%m-%d').date()
+        return add_years_safe(parsed_date, DATE_YEAR_OFFSET)
     except (ValueError, TypeError):
         return None
 
