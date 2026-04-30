@@ -59,12 +59,23 @@ CREATE TABLE allergies (
     CONSTRAINT fk_allergies_patient FOREIGN KEY (patient) REFERENCES patients(id)
 );
 
+-- Create requests table
+CREATE TABLE requests (
+    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    patient_id VARCHAR2(50) NOT NULL,
+    request_date TIMESTAMP,
+    request_type VARCHAR2(100),
+    description VARCHAR2(500),
+    CONSTRAINT fk_requests_patient FOREIGN KEY (patient_id) REFERENCES patients(id)
+);
+
 select * from patients;
 select * from procedures;
 select * from observations;
 select * from medications;
 select * from conditions;
 select * from allergies;
+select * from requests;
 
 -- DELETE FROM procedures;
 -- DELETE FROM observations;
@@ -73,3 +84,4 @@ select * from allergies;
 -- DELETE FROM allergies;
 -- DELETE FROM patients;
 -- COMMIT;
+
