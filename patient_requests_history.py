@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime
 
 import oracledb
@@ -83,11 +84,18 @@ def get_patient_requests(patient_id, request_type, connection=None):
 
 def main():
     """Example usage."""
-    patient_id = "01207ecd-9dff-4754-8887-4652eda231e2"
+    patient_id = "10339b10-3cd1-4ac3-ac13-ec26728cb592"
     request_type = "pain"
     result = get_patient_requests(patient_id, request_type)
-    print(result)
+    print(json.dumps(result, indent=2, ensure_ascii=False))
 
+    request_type = "basic_needs"
+    result = get_patient_requests(patient_id, request_type)
+    print(json.dumps(result, indent=2, ensure_ascii=False))
+
+    request_type = "communication"
+    result = get_patient_requests(patient_id, request_type)
+    print(json.dumps(result, indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":
     main()

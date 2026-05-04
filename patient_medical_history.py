@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import date, datetime
 
 import oracledb
@@ -151,9 +152,9 @@ def get_patient_history(patient_id, connection=None):
 
 def main():
     """Example usage."""
-    patient_id = '01207ecd-9dff-4754-8887-4652eda231e2' 
+    patient_id = '10339b10-3cd1-4ac3-ac13-ec26728cb592' 
     medical_history = get_patient_history(patient_id)
-    print(medical_history)
+    print(json.dumps(medical_history, indent=2, ensure_ascii=False))
 
 if __name__ == "__main__":    
     main()

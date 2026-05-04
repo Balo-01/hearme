@@ -69,19 +69,20 @@ CREATE TABLE requests (
     CONSTRAINT fk_requests_patient FOREIGN KEY (patient_id) REFERENCES patients(id)
 );
 
-select * from patients;
-select * from procedures;
-select * from observations;
-select * from medications;
-select * from conditions;
-select * from allergies;
-select * from requests;
+-- select * from patients;
+-- select * from procedures;
+-- select * from observations;
+-- select * from medications;
+-- select * from conditions;
+-- select * from allergies;
+-- select * from requests;
 
 -- DELETE FROM procedures;
 -- DELETE FROM observations;
 -- DELETE FROM medications;
 -- DELETE FROM conditions;
 -- DELETE FROM allergies;
+-- DELETE FROM requests;
 -- DELETE FROM patients;
 -- COMMIT;
 

@@ -111,6 +111,9 @@ def load_procedures(connection, valid_patient_ids):
         description = str(row['DESCRIPTION'])[:500] if pd.notna(row['DESCRIPTION']) else None
         reason = str(row['REASONDESCRIPTION'])[:500] if pd.notna(row['REASONDESCRIPTION']) else None
         
+        if description and 'medication reconciliation' in description.lower():
+            continue
+        
         cursor.execute("""
             INSERT INTO procedures (procedure_date, patient, description, reason)
             VALUES (:1, :2, :3, :4)
