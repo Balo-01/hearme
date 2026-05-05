@@ -1,5 +1,7 @@
 ﻿.venv/
 config.txt
+__pycache__/
+*.pyc
 create-user.sql
 .env
 questions.txt
