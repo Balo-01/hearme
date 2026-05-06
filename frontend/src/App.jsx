@@ -10,7 +10,7 @@ import PainOther from './pages/patient/Pain/PainOther';
 import PainIntensity from './pages/patient/Pain/PainIntensity';
 import Emergency from './pages/patient/Emergency';
 import FinalAnswer from './pages/patient/FinalAnswer';
-import Nurse from './pages/Nurse/Nurse';
+import Nurse from './pages/nurse/Nurse';
 import RequestSent from './pages/patient/RequestSent';
 
 function App() {
@@ -29,17 +29,7 @@ function App() {
       <Route path="/nurse" element={<Nurse />} />
       <Route path="/patient/final-answer" element={<FinalAnswer />} />
       <Route path="/patient/request-sent" element={<RequestSent />} />
-
-      <Route path="/basic-needs" element={<Navigate to="/patient/basic-needs" replace />} />
-      <Route path="/basic-needs/other" element={<Navigate to="/patient/basic-needs/other" replace />} />
-      <Route path="/communication" element={<Navigate to="/patient/communication" replace />} />
-      <Route path="/communication/other" element={<Navigate to="/patient/communication/other" replace />} />
-      <Route path="/pain" element={<Navigate to="/patient/pain" replace />} />
-      <Route path="/pain/other" element={<Navigate to="/patient/pain/other" replace />} />
-      <Route path="/pain/intensity" element={<Navigate to="/patient/pain/intensity" replace />} />
-      <Route path="/emergency" element={<Navigate to="/patient/emergency" replace />} />
-      <Route path="/final-answer" element={<Navigate to="/patient/final-answer" replace />} />
-      <Route path="/request-sent" element={<Navigate to="/patient/request-sent" replace />} />
+      <Route path="*" element={<Navigate to="/patient" replace />} />
     </Routes>
   );
 }
