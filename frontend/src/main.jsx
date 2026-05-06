@@ -7,7 +7,6 @@ import { RequestsProvider } from './context/RequestsContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* Global requests state available to patient and nurse pages. */}
     <RequestsProvider>
       <BrowserRouter>
         <App />

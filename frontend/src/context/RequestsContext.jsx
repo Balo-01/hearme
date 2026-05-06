@@ -19,7 +19,6 @@ const loadInitialRequests = () => {
   }
 };
 
-// Placeholder AI reformulation used until backend inference is integrated.
 const buildAiRephrasedRequest = (requestText, source) => {
   const normalizedSource = String(source || 'general').toLowerCase();
   return `The patient submitted a ${normalizedSource} request: ${requestText}. Please review and provide the appropriate support.`;
@@ -57,7 +56,6 @@ export function RequestsProvider({ children }) {
           rawRequest: requestText,
           aiRephrasedRequest: buildAiRephrasedRequest(requestText, source),
           patientHistory: buildPatientHistory(),
-          status: 'pending',
           isRead: false,
         };
 

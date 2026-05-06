@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useRequests } from '../context/RequestsContext.jsx';
-import '../App.css';
+import { useRequests } from '../../context/RequestsContext.jsx';
+import '../../App.css';
 
 export default function RequestSent() {
   const [showRedirectMessage, setShowRedirectMessage] = useState(false);
-  // Prevents duplicate addRequest calls in StrictMode/dev double-render scenarios.
   const didSendRef = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -31,7 +30,7 @@ export default function RequestSent() {
     }, 3000);
 
     const redirectTimerId = setTimeout(() => {
-      navigate('/');
+      navigate('/patient');
     }, 6000);
 
     return () => {

@@ -1,40 +1,40 @@
-import '../../App.css';
-import useHoverNavigate from '../../hooks/useHoverNavigate';
+import '../../../App.css';
+import useHoverNavigate from '../../../hooks/useHoverNavigate';
 
-export default function PainOther() {
+export default function Pain() {
   const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
 
   return (
     <>
-      <div className="center-message">Other pain areas</div>
+      <div className="center-message">What hurts?</div>
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/pain/intensity', { state: { area: 'Head' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/pain/intensity', { state: { area: 'Head' } })}
           onMouseLeave={handleMouseLeave}
         >
           Head
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/pain/intensity', { state: { area: 'Breathing' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/pain/intensity', { state: { area: 'Stomach' } })}
           onMouseLeave={handleMouseLeave}
         >
-          Breathing
+          Stomach
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/pain/intensity', { state: { area: 'Limbs' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/pain/intensity', { state: { area: 'Back' } })}
           onMouseLeave={handleMouseLeave}
         >
-          Limbs
+          Back
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() => handleMouseEnter('/pain/intensity', { state: { area: 'Abdomen' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/pain/other')}
           onMouseLeave={handleMouseLeave}
         >
-          Abdomen
+          Other
         </button>
       </div>
     </>

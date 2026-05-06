@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import '../App.css';
 import { useLocation, useNavigate } from 'react-router-dom';
-import useHoverNavigate from '../hooks/useHoverNavigate';
+import '../../App.css';
+import useHoverNavigate from '../../hooks/useHoverNavigate';
 
 export default function FinalAnswer() {
   // State passed from previous page carries source category + selected request.
@@ -21,7 +21,7 @@ export default function FinalAnswer() {
     }
 
     const redirectTimerId = setTimeout(() => {
-      navigate('/');
+      navigate('/patient');
     }, 3000);
 
     return () => clearTimeout(redirectTimerId);
@@ -85,8 +85,7 @@ export default function FinalAnswer() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn bottom-left"
-          // Preserve request payload so RequestSent can push it to shared store.
-          onMouseEnter={() => handleMouseEnter('/request-sent', { state: { source, request } })}
+          onMouseEnter={() => handleMouseEnter('/patient/request-sent', { state: { source, request } })}
           onMouseLeave={handleMouseLeave}
         >
           Yes

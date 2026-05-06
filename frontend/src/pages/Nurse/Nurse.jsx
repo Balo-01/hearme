@@ -23,18 +23,14 @@ export default function Nurse() {
 	// Active request displayed in right-side detail panel.
 	const selectedRequest = useMemo(() => requests.find((request) => request.id === selectedRequestId), [requests, selectedRequestId]);
 
-	// Priority order: unread first, then pending-read, then resolved.
+	// Priority order: unread first, then read.
 	const sortedRequests = useMemo(() => {
 		const getPriority = (request) => {
 			if (!request.isRead) {
 				return 0;
 			}
 
-			if (request.status === 'pending') {
-				return 1;
-			}
-
-			return 2;
+			return 1;
 		};
 
 		return [...requests].sort((left, right) => getPriority(left) - getPriority(right));
@@ -55,19 +51,9 @@ export default function Nurse() {
 		);
 	};
 
-	// Resolve keeps request in list and updates visual status.
+	// Resolve removes request from queue so only active work remains visible.
 	const handleResolveRequest = (resolvedRequestId) => {
-		setRequests((previousRequests) =>
-			previousRequests.map((request) =>
-				request.id === resolvedRequestId
-					? {
-							...request,
-							status: 'resolved',
-							isRead: true,
-						}
-					: request
-			)
-		);
+		setRequests((previousRequests) => previousRequests.filter((request) => request.id !== resolvedRequestId));
 	};
 
 	return (
@@ -82,12 +68,14 @@ export default function Nurse() {
 					<div className="nurse-request-list">
 						{sortedRequests.map((request) => {
 							const isActive = request.id === selectedRequest?.id;
-							const isResolved = request.status === 'resolved';
+							const isEmergency = request.category === 'emergency';
 
 							return (
 								<div
 									key={request.id}
-									className={`nurse-request-item ${isActive ? 'active' : ''} ${isResolved ? 'resolved' : ''} ${
+									className={`nurse-request-item ${isActive ? 'active' : ''} ${
+										isEmergency ? 'emergency' : ''
+									} ${
 										request.isRead ? 'read' : 'unread'
 									}`}
 									onClick={() => handleSelectRequest(request.id)}
@@ -99,10 +87,8 @@ export default function Nurse() {
 									<div className="nurse-request-item-main">{request.rawRequest}</div>
 									<div className="nurse-request-item-status-row">
 										<div className="nurse-request-item-meta">{request.category}</div>
-										<div className={`nurse-status-badge ${request.status}`}>{request.status}</div>
 									</div>
 									<div className="nurse-request-actions">
-										{!isResolved ? (
 											<button
 												type="button"
 												className="nurse-request-resolve-btn"
@@ -113,12 +99,11 @@ export default function Nurse() {
 											>
 												Resolved
 											</button>
-										) : null}
 									</div>
 								</div>
 							);
 						})}
-						{requests.length === 0 ? <div className="nurse-empty-state">No pending requests.</div> : null}
+						{requests.length === 0 ? <div className="nurse-empty-state">No active requests.</div> : null}
 					</div>
 				</aside>
 
@@ -128,7 +113,6 @@ export default function Nurse() {
 							<div className="nurse-detail-card">
 								<h3>Patient original request</h3>
 								<p className="nurse-raw-request">{selectedRequest.rawRequest}</p>
-								<div className={`nurse-status-badge ${selectedRequest.status}`}>{selectedRequest.status}</div>
 							</div>
 
 							<div className="nurse-detail-card">
@@ -147,7 +131,7 @@ export default function Nurse() {
 						</>
 					) : (
 						<div className="nurse-detail-card nurse-empty-state">
-							All requests are resolved. New requests will appear here.
+							No active requests right now. New requests will appear here.
 						</div>
 					)}
 				</section>

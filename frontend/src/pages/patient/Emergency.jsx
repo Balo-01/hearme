@@ -1,10 +1,27 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../App.css';
+import { useRequests } from '../../context/RequestsContext.jsx';
+import '../../App.css';
 
 export default function Emergency() {
   const navigate = useNavigate();
+  const { addRequest } = useRequests();
   const [showRedirectMessage, setShowRedirectMessage] = useState(false);
+  const didSendRef = useRef(false);
+
+  useEffect(() => {
+    if (didSendRef.current) {
+      return;
+    }
+
+    didSendRef.current = true;
+
+    // Emergency is a direct action, so we enqueue it immediately for the nurse dashboard.
+    addRequest({
+      source: 'emergency',
+      request: 'Emergency assistance needed',
+    });
+  }, [addRequest]);
 
   useEffect(() => {
     const redirectMessageTimerId = setTimeout(() => {
@@ -12,7 +29,7 @@ export default function Emergency() {
     }, 3000);
 
     const redirectTimerId = setTimeout(() => {
-      navigate('/');
+      navigate('/patient');
     }, 5000);
 
     return () => {

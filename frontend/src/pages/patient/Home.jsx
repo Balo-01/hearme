@@ -1,6 +1,6 @@
 import React from 'react';
-import '../App.css';
-import useHoverNavigate from '../hooks/useHoverNavigate';
+import '../../App.css';
+import useHoverNavigate from '../../hooks/useHoverNavigate';
 
 export default function Home() {
   // Home entry screen: 4 quadrants, each navigates after sustained hover.
@@ -13,7 +13,7 @@ export default function Home() {
         <button
           className="quadrant-btn top-left"
           aria-label="Basic Needs"
-          onMouseEnter={() => handleMouseEnter('/basic-needs')}
+          onMouseEnter={() => handleMouseEnter('/patient/basic-needs')}
           onMouseLeave={handleMouseLeave}
         >
           <span className="icon" role="img" aria-label="Basic Needs">🍽️</span>
@@ -22,7 +22,7 @@ export default function Home() {
         <button
           className="quadrant-btn top-right"
           aria-label="Communication"
-          onMouseEnter={() => handleMouseEnter('/communication')}
+          onMouseEnter={() => handleMouseEnter('/patient/communication')}
           onMouseLeave={handleMouseLeave}
         >
           <span className="icon" role="img" aria-label="Communication">💬</span>
@@ -31,7 +31,7 @@ export default function Home() {
         <button
           className="quadrant-btn bottom-left"
           aria-label="Pain"
-          onMouseEnter={() => handleMouseEnter('/pain')}
+          onMouseEnter={() => handleMouseEnter('/patient/pain')}
           onMouseLeave={handleMouseLeave}
         >
           <span className="icon" role="img" aria-label="Pain">🤕</span>
@@ -40,7 +40,7 @@ export default function Home() {
         <button
           className="quadrant-btn bottom-right"
           aria-label="Emergency"
-          onMouseEnter={() => handleMouseEnter('/emergency')}
+          onMouseEnter={() => handleMouseEnter('/patient/emergency')}
           onMouseLeave={handleMouseLeave}
         >
           <span className="icon" role="img" aria-label="Emergency">🚨</span>

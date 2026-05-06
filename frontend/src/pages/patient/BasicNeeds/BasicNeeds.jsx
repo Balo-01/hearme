@@ -1,5 +1,5 @@
-import '../../App.css';
-import useHoverNavigate from '../../hooks/useHoverNavigate';
+import '../../../App.css';
+import useHoverNavigate from '../../../hooks/useHoverNavigate';
 
 export default function BasicNeeds() {
   const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
@@ -10,28 +10,28 @@ export default function BasicNeeds() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/final-answer', { state: { source: 'basic-needs', request: 'Water' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Water' } })}
           onMouseLeave={handleMouseLeave}
         >
           Water
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/final-answer', { state: { source: 'basic-needs', request: 'Food' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Food' } })}
           onMouseLeave={handleMouseLeave}
         >
           Food
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/final-answer', { state: { source: 'basic-needs', request: 'Toilet' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Toilet' } })}
           onMouseLeave={handleMouseLeave}
         >
           Toilet
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() => handleMouseEnter('/basic-needs/other')}
+          onMouseEnter={() => handleMouseEnter('/patient/basic-needs/other')}
           onMouseLeave={handleMouseLeave}
         >
           Other

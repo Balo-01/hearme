@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
-import '../../App.css';
-import useHoverNavigate from '../../hooks/useHoverNavigate';
+import '../../../App.css';
+import useHoverNavigate from '../../../hooks/useHoverNavigate';
 
 export default function PainIntensity() {
   const location = useLocation();
@@ -15,7 +15,7 @@ export default function PainIntensity() {
         <button
           className="quadrant-btn top-left"
           onMouseEnter={() =>
-            handleMouseEnter('/final-answer', {
+            handleMouseEnter('/patient/final-answer', {
               state: {
                 source: 'pain',
                 request: `${area} pain - Mild`,
@@ -29,7 +29,7 @@ export default function PainIntensity() {
         <button
           className="quadrant-btn top-right"
           onMouseEnter={() =>
-            handleMouseEnter('/final-answer', {
+            handleMouseEnter('/patient/final-answer', {
               state: {
                 source: 'pain',
                 request: `${area} pain - Moderate`,
@@ -43,7 +43,7 @@ export default function PainIntensity() {
         <button
           className="quadrant-btn bottom-left"
           onMouseEnter={() =>
-            handleMouseEnter('/final-answer', {
+            handleMouseEnter('/patient/final-answer', {
               state: {
                 source: 'pain',
                 request: `${area} pain - Severe`,
@@ -57,7 +57,7 @@ export default function PainIntensity() {
         <button
           className="quadrant-btn bottom-right"
           onMouseEnter={() =>
-            handleMouseEnter('/final-answer', {
+            handleMouseEnter('/patient/final-answer', {
               state: {
                 source: 'pain',
                 request: `${area} pain - Unbearable`,
