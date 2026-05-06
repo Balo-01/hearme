@@ -1,8 +1,0 @@
-mediapipe==0.10.21
-opencv-python
-numpy
-pyautogui
-keyboard
-scipy 
-
-#for WebcamTracking might need to replace numpy with numpy<2
