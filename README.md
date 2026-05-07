@@ -106,4 +106,34 @@ Patient requests example:
 py .\patient_requests_history.py
 ```
 
-You can also run populate_requests.py if you want to have some test data into the requests table.
+You can also run database/populate_requests.sql if you want to add test data into the requests table.
+
+## Step 7 - Run the FastAPI Request Server
+
+The frontend should be added separately and call this backend over HTTP.
+
+Start the API from the repository root:
+
+```powershell
+uvicorn server:app --reload
+```
+
+The backend runs at:
+
+- http://localhost:8000
+- http://localhost:8000/docs for Swagger UI
+
+Request API examples:
+
+```powershell
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/requests -ContentType "application/json" -Body '{"patient_id":"10339b10-3cd1-4ac3-ac13-ec26728cb592","path":["pain","severe"]}'
+Invoke-RestMethod -Uri "http://localhost:8000/requests?status=active"
+Invoke-RestMethod -Method Patch -Uri http://localhost:8000/requests/1/dismiss
+```
+
+For local frontend development, CORS is enabled for:
+
+- http://localhost:3000
+- http://localhost:5173
+
+Override this with a comma-separated CORS_ORIGINS value in .env if needed.

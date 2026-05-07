@@ -66,6 +66,9 @@ CREATE TABLE requests (
     request_date TIMESTAMP,
     request_type VARCHAR2(100),
     description VARCHAR2(500),
+    path CLOB,
+    status VARCHAR2(20) DEFAULT 'active' NOT NULL,
+    dismissed_at TIMESTAMP,
     CONSTRAINT fk_requests_patient FOREIGN KEY (patient_id) REFERENCES patients(id)
 );
 
