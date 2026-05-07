@@ -2,7 +2,7 @@ import '../../../App.css';
 import useHoverNavigate from '../../../hooks/useHoverNavigate';
 
 export default function CommunicationOther() {
-  const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(3000);
 
   return (
     <>
@@ -10,29 +10,25 @@ export default function CommunicationOther() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Doctor' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Doctor' } })}
         >
           Doctor
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Family' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Family' } })}
         >
           Family
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Translator' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Translator' } })}
         >
           Translator
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Call support' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Call support' } })}
         >
           Call support
         </button>

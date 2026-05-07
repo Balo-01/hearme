@@ -2,7 +2,7 @@ import '../../../App.css';
 import useHoverNavigate from '../../../hooks/useHoverNavigate';
 
 export default function Communication() {
-  const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(3000);
 
   return (
     <>
@@ -10,29 +10,25 @@ export default function Communication() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Nurse' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Nurse' } })}
         >
           Nurse
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Wife' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Wife' } })}
         >
           Wife
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Friend' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Friend' } })}
         >
           Friend
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() => handleMouseEnter('/patient/communication/other')}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/communication/other')}
         >
           Other
         </button>

@@ -1,27 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import '../../App.css';
 import { useRequests } from '../../context/RequestsContext.jsx';
 
 export default function Nurse() {
 	// Requests come from shared local store populated by patient flow.
 	const { requests, setRequests } = useRequests();
-	const [selectedRequestId, setSelectedRequestId] = useState(requests[0]?.id || null);
-
-	// Keep selection valid whenever list changes.
-	useEffect(() => {
-		if (requests.length === 0) {
-			setSelectedRequestId(null);
-			return;
-		}
-
-		const requestStillExists = requests.some((request) => request.id === selectedRequestId);
-		if (!requestStillExists) {
-			setSelectedRequestId(requests[0].id);
-		}
-	}, [requests, selectedRequestId]);
+	const [selectedRequestId, setSelectedRequestId] = useState(null);
 
 	// Active request displayed in right-side detail panel.
-	const selectedRequest = useMemo(() => requests.find((request) => request.id === selectedRequestId), [requests, selectedRequestId]);
+	const selectedRequest = useMemo(
+		() => requests.find((request) => request.id === selectedRequestId) || requests[0] || null,
+		[requests, selectedRequestId]
+	);
 
 	// Priority order: unread first, then read.
 	const sortedRequests = useMemo(() => {
@@ -53,6 +43,9 @@ export default function Nurse() {
 
 	// Resolve removes request from queue so only active work remains visible.
 	const handleResolveRequest = (resolvedRequestId) => {
+		if (selectedRequestId === resolvedRequestId) {
+			setSelectedRequestId(null);
+		}
 		setRequests((previousRequests) => previousRequests.filter((request) => request.id !== resolvedRequestId));
 	};
 

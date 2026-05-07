@@ -1,34 +1,89 @@
-1. Open PowerShell/Terminal in this folder.
+HearMe - How to run
+====================
 
-2. Create a virtual environment with Python 3.12:
-py -3.12 -m venv .venv
+Recommended startup
+-------------------
+Open PowerShell in this folder:
 
-3. Allow script activation for this session:
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  C:\Users\mbirgovan\OneDrive - ENDAVA\Desktop\eyetracker on front\hearme
 
-4. Activate the virtual environment:
-.\.venv\Scripts\Activate.ps1
+Then run:
 
-5. Upgrade pip:
-python -m pip install --upgrade pip
+  .\start-hearme.ps1
 
-6. Install dependencies:
-pip install -r requirements.txt
+What this does:
+- clears port 8765 if another gaze server is already listening there
+- starts the Python eyetrax WebSocket server
+- starts the React/Vite frontend
+- opens the app at the Vite localhost URL shown in the terminal
+- uses plain Kalman mode by default, matching `eyetrax-demo --filter kalman`
 
-7. Run the app:
-python .\head_mouse.py
+First-time setup
+----------------
+Frontend dependencies:
 
+  cd frontend
+  npm install
+  cd ..
 
-If there are any errors in depencies go in requirements and read the instructions there
+Python dependencies:
 
-Notes:
-- Use Python 3.12.x
-- MediaPipe is pinned to 0.10.21 because this script uses the legacy `mp.solutions.face_mesh` API
-- If mouse control or key detection acts weird, try running PowerShell as Administrator
-- If the camera does not open, allow camera access in Windows Privacy settings
-- Keys used by the script:
-  - C = calibrate / lock eye spheres
-  - S = screen calibration
-  - X = add marker
-  - F7 = toggle mouse control
-  - Q = quit
+  cd eyetrax
+  py -3.12 -m venv .venv
+  Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+  .\.venv\Scripts\Activate.ps1
+  python -m pip install --upgrade pip
+  python -m pip install -e .
+  cd ..
+
+Run options
+-----------
+Use a different camera:
+
+  .\start-hearme.ps1 -Camera 1
+
+Use a different port:
+
+  .\start-hearme.ps1 -Port 8766
+
+Skip automatic port cleanup:
+
+  .\start-hearme.ps1 -SkipPortCleanup
+
+Try Kalman+EMA manually:
+
+  .\start-hearme.ps1 -Filter kalman_ema -EmaAlpha 0.25
+
+Calibration advice
+------------------
+- Keep your eyes inside the blue webcam-level band.
+- The best position from testing is face centered, eyes roughly level with the webcam, and head naturally upright.
+- Adjust chair/screen/camera height before forcing your head angle.
+- Calibrate in the same posture you will use for navigation.
+- Keep lighting stable and mostly from the front.
+- Avoid bright backlight.
+- Do not resize or move the browser window after calibration.
+- After the 9-point pass, check the quality readout. If it says corner separation is weak, recalibrate and make sure your eyes clearly move to each dot while your head stays natural.
+
+Keyboard controls
+-----------------
+- Space or Enter: start calibration from setup screen
+- R: recalibrate from the patient flow
+- Gaze dwell: hold gaze on a menu direction/button for about 3 seconds
+
+Troubleshooting
+---------------
+If the camera does not open:
+- close other apps using the webcam
+- check Windows camera privacy permissions
+- try another camera index with `-Camera 1`
+
+If port 8765 is already used:
+- the startup script should clear it automatically
+- to inspect manually: `netstat -ano | findstr :8765`
+
+If tracking feels inaccurate:
+- restart the gaze server and recalibrate once from a natural posture
+- keep eyes inside the blue webcam-level band
+- watch the calibration quality readout for weak corner separation
+- compare against upstream EyeTrax using `eyetrax-demo --filter kalman` under the same lighting and webcam position

@@ -137,7 +137,8 @@
 
 /* Progressive highlight during sustained hover (used by eye-tracking flow). */
 .quadrant-btn:hover,
-.quadrant-btn:focus {
+.quadrant-btn:focus,
+.quadrant-btn.gaze-dwell-active {
   transition: transform 3s ease, box-shadow 3s ease, filter 3s ease;
   transform: translateY(-6px) scale(1.14);
   box-shadow: 0 28px 50px rgba(15, 35, 66, 0.34);
@@ -453,3 +454,4 @@
     max-height: none;
   }
 }
+

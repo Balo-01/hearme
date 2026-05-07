@@ -162,6 +162,7 @@ class GazeEstimator:
         self._movement_threshold = 0.04
         self.patient_moved = False
         self.movement_amount = 0.0
+        self.last_face_metrics = None
 
     def extract_features(self, image):
         """
@@ -181,6 +182,7 @@ class GazeEstimator:
 
         result = self._face_landmarker.detect_for_video(mp_image, ts_ms)
         if not result.face_landmarks:
+            self.last_face_metrics = None
             return None, False
 
         landmarks = result.face_landmarks[0]
@@ -262,6 +264,32 @@ class GazeEstimator:
         else:
             thr = 0.2
         blink_detected = EAR < thr
+
+        frame_height, frame_width = image.shape[:2]
+        min_xy = all_points[:, :2].min(axis=0)
+        max_xy = all_points[:, :2].max(axis=0)
+        brightness = float(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY).mean())
+        inter_eye_ratio = float(
+            np.linalg.norm((right_corner[:2] - left_corner[:2]))
+        )
+        self.last_face_metrics = {
+            "frame_width": int(frame_width),
+            "frame_height": int(frame_height),
+            "eye_center_x": float(eye_center[0]),
+            "eye_center_y": float(eye_center[1]),
+            "center_offset_x": float(eye_center[0] - 0.5),
+            "center_offset_y": float(eye_center[1] - 0.42),
+            "face_width": float(max_xy[0] - min_xy[0]),
+            "face_height": float(max_xy[1] - min_xy[1]),
+            "inter_eye_ratio": inter_eye_ratio,
+            "yaw_degrees": float(np.degrees(yaw)),
+            "pitch_degrees": float(np.degrees(pitch)),
+            "roll_degrees": float(np.degrees(roll)),
+            "ear": float(EAR),
+            "blink": bool(blink_detected),
+            "brightness": brightness,
+            "movement_amount": float(self.movement_amount),
+        }
 
         return features, blink_detected
 

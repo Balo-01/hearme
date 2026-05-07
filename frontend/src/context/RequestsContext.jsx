@@ -68,6 +68,7 @@ export function RequestsProvider({ children }) {
   return <RequestsContext.Provider value={value}>{children}</RequestsContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRequests() {
   const context = useContext(RequestsContext);
 

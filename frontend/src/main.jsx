@@ -4,13 +4,16 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import { RequestsProvider } from './context/RequestsContext.jsx';
+import { EyeTrackingProvider } from './context/EyeTrackingContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <RequestsProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
-    </RequestsProvider>
+    <EyeTrackingProvider>
+      <RequestsProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </RequestsProvider>
+    </EyeTrackingProvider>
   </StrictMode>
 );

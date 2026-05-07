@@ -18,6 +18,7 @@ dependencies    = [
   "scipy>=1.10",
   "screeninfo>=0.8",
   "pyvirtualcam>=0.10",
+  "websockets>=12.0",
 ]
 
 classifiers = [
@@ -34,6 +35,7 @@ homepage = "https://github.com/ck-zhang/eyetrax"
 eyetrax-demo        = "eyetrax.app.demo:run_demo"
 eyetrax-virtualcam  = "eyetrax.app.virtualcam:run_virtualcam"
 eyetrax-build-model = "eyetrax.app.build_model:main"
+eyetrax-server      = "eyetrax.server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/eyetrax"]
