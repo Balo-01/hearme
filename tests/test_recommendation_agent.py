@@ -4,8 +4,9 @@ import sys
 from pathlib import Path
 
 CURRENT_DIR = Path(__file__).resolve().parent
+ROOT_DIR = CURRENT_DIR.parent
 
-sys.path.insert(0, str(CURRENT_DIR))
+sys.path.insert(0, str(ROOT_DIR))
 
 from agent.recommendation_agent import get_recommendations
 
@@ -16,7 +17,7 @@ def main() -> None:
     parser.add_argument(
         "category",
         nargs="?",
-        default="pain",
+        default="communication",
         choices=["pain", "basic_needs", "communication"],
         help="Category: pain, basic_needs, or communication",
     )

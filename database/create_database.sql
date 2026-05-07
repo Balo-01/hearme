@@ -88,4 +88,3 @@ CREATE TABLE requests (
 -- DELETE FROM requests;
 -- DELETE FROM patients;
 -- COMMIT;
-

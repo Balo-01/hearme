@@ -1,6 +1,6 @@
 -- Seed one request of each type for every patient (3 requests per patient)
 
-INSERT INTO requests (patient_id, request_date, request_type, description)
+INSERT INTO requests (patient_id, request_date, request_type, description, path, status, dismissed_at)
 WITH request_types AS (
 	SELECT 'basic_needs' AS request_type, 1 AS type_order FROM dual
 	UNION ALL
@@ -16,7 +16,10 @@ SELECT
 		WHEN 'basic_needs' THEN 'food'
 		WHEN 'communication' THEN 'call family'
 		WHEN 'pain' THEN 'head-mild-pain'
-	END
+	END,
+	NULL,
+	'active',
+	NULL
 FROM patients p
 CROSS JOIN request_types rt;
 

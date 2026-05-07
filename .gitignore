@@ -1,6 +1,7 @@
 ﻿.venv/
 config.txt
 __pycache__/
+agent/__pycache__/
 *.pyc
 create-user.sql
 .env

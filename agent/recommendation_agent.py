@@ -17,8 +17,8 @@ load_dotenv(ROOT_DIR / ".env")
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from patient_medical_history import get_patient_history
-from patient_requests_history import get_patient_requests
+from tools.patient_medical_history import get_patient_history
+from tools.patient_requests_history import get_patient_requests
 
 CATEGORY_OPTIONS = {
     "pain": [
@@ -29,7 +29,7 @@ CATEGORY_OPTIONS = {
         "temperature", "lighting", "body position"
     ],
     "communication": [
-        "call nurse", "call family", "call doctor"
+        "call nurse", "call family", "call doctor", "call cleaning"
     ],
 }
 
@@ -162,6 +162,9 @@ def get_recommendations(patient_id: str, category: str) -> Dict:
         "Focus on specific things the patient can request based on their history, like 'head pain' or 'breathing difficulty' for pain category, "
         "'water' or 'bathroom' for basic needs, 'talk to family' or 'talk to nurse' for communication. "
         "Keep basic_needs recommendations distinct from communication recommendations and different from pain-related recommendations. "
+        "Don't give recommendations about pain if the category is basic_needs or communication. "
+        "Don't give recommendations about basic needs if the category is pain or communication. "
+        "Don't give recommendations about communication if the category is pain or basic_needs. "
         "Do not output extra keys or commentary."
     )
 
