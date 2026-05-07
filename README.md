@@ -56,12 +56,6 @@ Create a user, connect to the database and run:
 
 This creates all tables and constraints required by the ETL and query scripts.
 
-If the database already existed before the FastAPI request server was added, also run:
-
-- database/alter_requests_for_server.sql
-
-This adds the request fields used by the server: path, status, and dismissed_at.
-
 ## Step 3 - Configure Environment Variables
 
 Create a .env file in the repository root with values like:
