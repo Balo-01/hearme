@@ -11,7 +11,6 @@ const buildAiRephrasedRequest = (requestText, source) => {
 };
 
 // Placeholder for patient history until AI integration is implemented.
-// In the future, this will be fetched from the backend and used as context for AI recommendations.
 const buildPatientHistory = () => [
   'No backend history is linked yet.',
   'This item is generated locally for UI preview.',
@@ -54,8 +53,6 @@ const mapBackendRequest = (backendReq, source, requestText) => {
 
 const POLLING_INTERVAL_MS = 5000;
 
-// Provides global access to the patient requests list and actions (add, dismiss).
-// Wraps the entire app so both the patient and nurse views share the same state.
 export function RequestsProvider({ children }) {
   const [requests, setRequests] = useState([]);
 
@@ -106,8 +103,6 @@ export function RequestsProvider({ children }) {
   return <RequestsContext.Provider value={value}>{children}</RequestsContext.Provider>;
 }
 
-// Custom hook for consuming the RequestsContext.
-// Must be used inside a RequestsProvider, otherwise throws an error.
 export function useRequests() {
   const context = useContext(RequestsContext);
 
