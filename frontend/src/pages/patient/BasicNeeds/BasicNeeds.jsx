@@ -10,21 +10,21 @@ export default function BasicNeeds() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Water' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Water', path: ['basic-needs', 'water'] } })}
           onMouseLeave={handleMouseLeave}
         >
           Water
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Food' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Food', path: ['basic-needs', 'food'] } })}
           onMouseLeave={handleMouseLeave}
         >
           Food
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Toilet' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Toilet', path: ['basic-needs', 'toilet'] } })}
           onMouseLeave={handleMouseLeave}
         >
           Toilet

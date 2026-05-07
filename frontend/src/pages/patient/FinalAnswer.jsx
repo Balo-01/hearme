@@ -10,6 +10,7 @@ export default function FinalAnswer() {
   const request = location.state?.request || 'Unknown request';
   const normalizedRequest = String(request).toLowerCase();
   const source = location.state?.source || 'basic-needs';
+  const path = location.state?.path || [source];
   const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
   const [isRedirectingHome, setIsRedirectingHome] = useState(false);
   const noHoverTimerRef = useRef(null);
@@ -85,7 +86,7 @@ export default function FinalAnswer() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/request-sent', { state: { source, request } })}
+          onMouseEnter={() => handleMouseEnter('/patient/request-sent', { state: { source, request, path } })}
           onMouseLeave={handleMouseLeave}
         >
           Yes

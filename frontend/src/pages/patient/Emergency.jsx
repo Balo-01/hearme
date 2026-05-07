@@ -17,10 +17,18 @@ export default function Emergency() {
     didSendRef.current = true;
 
     // Emergency is a direct action, so we enqueue it immediately for the nurse dashboard.
-    addRequest({
-      source: 'emergency',
-      request: 'Emergency assistance needed',
-    });
+    const sendEmergencyRequest = async () => {
+      try {
+        await addRequest({
+          source: 'emergency',
+          request: 'Emergency assistance needed',
+        });
+      } catch (error) {
+        console.error('Failed to send emergency request:', error);
+      }
+    };
+
+    sendEmergencyRequest();
   }, [addRequest]);
 
   useEffect(() => {

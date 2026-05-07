@@ -19,6 +19,7 @@ export default function PainIntensity() {
               state: {
                 source: 'pain',
                 request: `${area} pain - Mild`,
+                path: ['pain', normalizedArea, 'mild'],
               },
             })
           }
@@ -33,6 +34,7 @@ export default function PainIntensity() {
               state: {
                 source: 'pain',
                 request: `${area} pain - Moderate`,
+                path: ['pain', normalizedArea, 'moderate'],
               },
             })
           }
@@ -47,6 +49,7 @@ export default function PainIntensity() {
               state: {
                 source: 'pain',
                 request: `${area} pain - Severe`,
+                path: ['pain', normalizedArea, 'severe'],
               },
             })
           }
@@ -61,6 +64,7 @@ export default function PainIntensity() {
               state: {
                 source: 'pain',
                 request: `${area} pain - Unbearable`,
+                path: ['pain', normalizedArea, 'unbearable'],
               },
             })
           }

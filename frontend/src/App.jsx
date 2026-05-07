@@ -4,7 +4,6 @@ import Home from './pages/patient/Home';
 import BasicNeeds from './pages/patient/BasicNeeds/BasicNeeds';
 import BasicNeedsOther from './pages/patient/BasicNeeds/BasicNeedsOther';
 import Communication from './pages/patient/Communication/Communication';
-import CommunicationOther from './pages/patient/Communication/CommunicationOther';
 import Pain from './pages/patient/Pain/Pain';
 import PainOther from './pages/patient/Pain/PainOther';
 import PainIntensity from './pages/patient/Pain/PainIntensity';
@@ -21,7 +20,6 @@ function App() {
       <Route path="/patient/basic-needs" element={<BasicNeeds />} />
       <Route path="/patient/basic-needs/other" element={<BasicNeedsOther />} />
       <Route path="/patient/communication" element={<Communication />} />
-      <Route path="/patient/communication/other" element={<CommunicationOther />} />
       <Route path="/patient/pain" element={<Pain />} />
       <Route path="/patient/pain/other" element={<PainOther />} />
       <Route path="/patient/pain/intensity" element={<PainIntensity />} />

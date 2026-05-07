@@ -20,8 +20,9 @@ export default function RequestSent() {
     addRequest({
       source: location.state?.source,
       request: location.state?.request,
+      path: location.state?.path,
     });
-  }, [addRequest, location.state?.request, location.state?.source]);
+  }, [addRequest, location.state?.request, location.state?.source, location.state?.path]);
 
   // Feedback timeline: show redirect notice, then return user to home.
   useEffect(() => {

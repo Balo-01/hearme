@@ -10,31 +10,31 @@ export default function Communication() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Nurse' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Nurse', path: ['communication', 'nurse'] } })}
           onMouseLeave={handleMouseLeave}
         >
           Nurse
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Wife' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Family', path: ['communication', 'family'] } })}
           onMouseLeave={handleMouseLeave}
         >
-          Wife
+          Family
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Friend' } })}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Doctor', path: ['communication', 'doctor'] } })}
           onMouseLeave={handleMouseLeave}
         >
-          Friend
+          Doctor
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() => handleMouseEnter('/patient/communication/other')}
+          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Cleaning', path: ['communication', 'cleaning'] } })}
           onMouseLeave={handleMouseLeave}
         >
-          Other
+          Cleaning
         </button>
       </div>
     </>
