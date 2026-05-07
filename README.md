@@ -108,7 +108,65 @@ py .\patient_requests_history.py
 
 You can also run database/populate_requests.sql if you want to add test data into the requests table.
 
-## Step 7 - Run the FastAPI Request Server
+## Step 7 - Configure the Recommendation Agent
+
+Add your OpenAI API key to the `.env` file:
+
+```dotenv
+OPENAI_API_KEY=your_openai_api_key
+```
+
+Install agent dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+## Agent Logic
+
+The recommendation agent is in `agent/recommendation_agent.py` and exposes a single function:
+
+```python
+get_recommendations(patient_id: str, category: str) -> dict
+```
+
+It returns exactly 3 recommendations for the given patient and category.
+
+### Categories
+
+| Category | Valid options |
+|---|---|
+| `pain` | head pain, back pain, stomach pain |
+| `basic_needs` | water, food, toilet, blanket, temperature, lighting, body position |
+| `communication` | call nurse, call family, call doctor, call cleaning |
+
+### How it works
+
+1. The agent sends the patient ID and category to `gpt-4o-mini` with two tool definitions:
+   - `get_patient_medical_history` — fetches conditions, procedures, observations, medications, allergies
+   - `get_patient_requests_history` — fetches the summarized request history for the given category
+2. For `pain`, the model calls both tools. For `basic_needs` and `communication`, it calls request history only.
+3. The model uses the fetched data and the predefined option list for the category to pick the 3 most relevant recommendations.
+4. The response is parsed from JSON and validated to contain exactly 3 items.
+
+### Output shape
+
+```json
+{
+  "patient_id": "...",
+  "category": "pain",
+  "recommendations": ["head pain", "back pain", "stomach pain"]
+}
+```
+
+### Test the agent
+
+```powershell
+py tests/test_recommendation_agent.py
+py tests/test_recommendation_agent.py <patient_uuid> <category>
+```
+
+## Step 8 - Run the FastAPI Request Server
 
 The frontend should be added separately and call this backend over HTTP.
 
