@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { getActiveRequests, createRequest, dismissRequest as dismissRequestApi } from '../services/requestsApi';
+import { usePatient } from './PatientContext';
 
 const RequestsContext = createContext(null);
 
@@ -55,6 +56,7 @@ const POLLING_INTERVAL_MS = 5000;
 
 export function RequestsProvider({ children }) {
   const [requests, setRequests] = useState([]);
+  const { patientId } = usePatient();
 
   // Fetches active requests from the backend on mount, then refreshes every POLLING_INTERVAL_MS.
   // This ensures the nurse dashboard reflects new patient requests without manual refresh.
@@ -81,10 +83,11 @@ export function RequestsProvider({ children }) {
       requests,
 
       // Sends a new request to the backend and adds it to the local list immediately.
-      // `patientId` is currently hardcoded as a fallback — should be replaced with dynamic patient identification.
-      addRequest: async ({ source, request, path, patientId }) => {
+      // Uses patientId from context if available, otherwise falls back to default.
+      addRequest: async ({ source, request, path, patientId: overriddenPatientId }) => {
+        const effectivePatientId = overriddenPatientId || patientId || '1d604da9-9a81-4ba9-80c2-de3375d59b40';
         const backendRequest = await createRequest(
-          patientId || '1d604da9-9a81-4ba9-80c2-de3375d59b40',
+          effectivePatientId,
           path || [source]
         );
         const newRequest = mapBackendRequest(backendRequest, source, request);
@@ -97,12 +100,13 @@ export function RequestsProvider({ children }) {
         setRequests((prev) => prev.filter((req) => req.id !== requestId));
       },
     }),
-    [requests]
+    [requests, patientId]
   );
 
   return <RequestsContext.Provider value={value}>{children}</RequestsContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useRequests() {
   const context = useContext(RequestsContext);
 

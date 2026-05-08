@@ -2,7 +2,7 @@ import '../../../App.css';
 import useHoverNavigate from '../../../hooks/useHoverNavigate';
 
 export default function BasicNeeds() {
-  const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(3000);
 
   return (
     <>
@@ -10,29 +10,25 @@ export default function BasicNeeds() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Water', path: ['basic-needs', 'water'] } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Water', path: ['basic-needs', 'water'] } })}
         >
           Water
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Food', path: ['basic-needs', 'food'] } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Food', path: ['basic-needs', 'food'] } })}
         >
           Food
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'basic-needs', request: 'Toilet', path: ['basic-needs', 'toilet'] } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Toilet', path: ['basic-needs', 'toilet'] } })}
         >
           Toilet
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() => handleMouseEnter('/patient/basic-needs/other')}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/basic-needs/other')}
         >
           Other
         </button>

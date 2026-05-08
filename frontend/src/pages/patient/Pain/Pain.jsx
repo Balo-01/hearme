@@ -2,7 +2,7 @@ import '../../../App.css';
 import useHoverNavigate from '../../../hooks/useHoverNavigate';
 
 export default function Pain() {
-  const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(3000);
 
   return (
     <>
@@ -10,29 +10,25 @@ export default function Pain() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/patient/pain/intensity', { state: { area: 'Head' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/pain/intensity', { state: { area: 'Head' } })}
         >
           Head
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/patient/pain/intensity', { state: { area: 'Stomach' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/pain/intensity', { state: { area: 'Stomach' } })}
         >
           Stomach
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/pain/intensity', { state: { area: 'Back' } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/pain/intensity', { state: { area: 'Back' } })}
         >
           Back
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() => handleMouseEnter('/patient/pain/other')}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/pain/other')}
         >
           Other
         </button>

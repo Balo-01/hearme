@@ -2,7 +2,7 @@ import '../../../App.css';
 import useHoverNavigate from '../../../hooks/useHoverNavigate';
 
 export default function Communication() {
-  const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(3000);
 
   return (
     <>
@@ -10,29 +10,25 @@ export default function Communication() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Nurse', path: ['communication', 'nurse'] } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Nurse', path: ['communication', 'nurse'] } })}
         >
           Nurse
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Family', path: ['communication', 'family'] } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Family', path: ['communication', 'family'] } })}
         >
           Family
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Doctor', path: ['communication', 'doctor'] } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Doctor', path: ['communication', 'doctor'] } })}
         >
           Doctor
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() => handleMouseEnter('/patient/final-answer', { state: { source: 'communication', request: 'Cleaning', path: ['communication', 'cleaning'] } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'communication', request: 'Cleaning', path: ['communication', 'cleaning'] } })}
         >
           Cleaning
         </button>

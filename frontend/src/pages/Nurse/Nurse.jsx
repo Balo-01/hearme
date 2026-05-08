@@ -1,6 +1,6 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import "../../App.css";
-import { useRequests } from "../../context/RequestsContext.jsx";
+import { useEffect, useMemo, useState } from 'react';
+import '../../App.css';
+import { useRequests } from '../../context/RequestsContext.jsx';
 
 export default function Nurse() {
   const { requests, dismissRequest } = useRequests();

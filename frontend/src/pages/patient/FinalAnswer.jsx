@@ -11,7 +11,7 @@ export default function FinalAnswer() {
   const normalizedRequest = String(request).toLowerCase();
   const source = location.state?.source || 'basic-needs';
   const path = location.state?.path || [source];
-  const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(3000);
   const [isRedirectingHome, setIsRedirectingHome] = useState(false);
   const noHoverTimerRef = useRef(null);
 
@@ -76,6 +76,14 @@ export default function FinalAnswer() {
     }
   };
 
+  const handleNoActivate = () => {
+    if (noHoverTimerRef.current) {
+      clearTimeout(noHoverTimerRef.current);
+      noHoverTimerRef.current = null;
+    }
+    setIsRedirectingHome(true);
+  };
+
   if (isRedirectingHome) {
     return <div className="center-message request-sent-message request-sent-redirect">Redirecting to home page...</div>;
   }
@@ -86,8 +94,7 @@ export default function FinalAnswer() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() => handleMouseEnter('/patient/request-sent', { state: { source, request, path } })}
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/request-sent', { state: { source, request, path } })}
         >
           Yes
         </button>
@@ -95,6 +102,7 @@ export default function FinalAnswer() {
           className="quadrant-btn bottom-right"
           onMouseEnter={handleNoMouseEnter}
           onMouseLeave={handleNoMouseLeave}
+          onClick={handleNoActivate}
         >
           No
         </button>

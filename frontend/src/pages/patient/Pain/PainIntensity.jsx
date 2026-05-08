@@ -6,7 +6,7 @@ export default function PainIntensity() {
   const location = useLocation();
   const area = location.state?.area || 'Unknown area';
   const normalizedArea = String(area).toLowerCase();
-  const { handleMouseEnter, handleMouseLeave } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(3000);
 
   return (
     <>
@@ -14,61 +14,49 @@ export default function PainIntensity() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          onMouseEnter={() =>
-            handleMouseEnter('/patient/final-answer', {
-              state: {
-                source: 'pain',
-                request: `${area} pain - Mild`,
-                path: ['pain', normalizedArea, 'mild'],
-              },
-            })
-          }
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', {
+            state: {
+              source: 'pain',
+              request: `${area} pain - Mild`,
+              path: ['pain', normalizedArea, 'mild'],
+            },
+          })}
         >
           Mild
         </button>
         <button
           className="quadrant-btn top-right"
-          onMouseEnter={() =>
-            handleMouseEnter('/patient/final-answer', {
-              state: {
-                source: 'pain',
-                request: `${area} pain - Moderate`,
-                path: ['pain', normalizedArea, 'moderate'],
-              },
-            })
-          }
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', {
+            state: {
+              source: 'pain',
+              request: `${area} pain - Moderate`,
+              path: ['pain', normalizedArea, 'moderate'],
+            },
+          })}
         >
           Moderate
         </button>
         <button
           className="quadrant-btn bottom-left"
-          onMouseEnter={() =>
-            handleMouseEnter('/patient/final-answer', {
-              state: {
-                source: 'pain',
-                request: `${area} pain - Severe`,
-                path: ['pain', normalizedArea, 'severe'],
-              },
-            })
-          }
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', {
+            state: {
+              source: 'pain',
+              request: `${area} pain - Severe`,
+              path: ['pain', normalizedArea, 'severe'],
+            },
+          })}
         >
           Severe
         </button>
         <button
           className="quadrant-btn bottom-right"
-          onMouseEnter={() =>
-            handleMouseEnter('/patient/final-answer', {
-              state: {
-                source: 'pain',
-                request: `${area} pain - Unbearable`,
-                path: ['pain', normalizedArea, 'unbearable'],
-              },
-            })
-          }
-          onMouseLeave={handleMouseLeave}
+          {...getNavigationProps('/patient/final-answer', {
+            state: {
+              source: 'pain',
+              request: `${area} pain - Unbearable`,
+              path: ['pain', normalizedArea, 'unbearable'],
+            },
+          })}
         >
           Unbearable
         </button>
