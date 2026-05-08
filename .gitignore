@@ -1,8 +1,61 @@
-﻿.venv/
-config.txt
+# Python
 __pycache__/
 agent/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
 *.pyc
-create-user.sql
+.Python
+.venv/
+venv/
+env/
 .env
+.env.*
+!.env.example
+pip-wheel-metadata/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+create-user.sql
 questions.txt
+
+# Python build artifacts
+build/
+dist/
+site/
+*.whl
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local logs
+*.log
+frontend/vite-dev.log
+frontend/vite-dev.err.log
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# MediaPipe / local model cache if copied into repo
+*.task
+*.tflite
+
+# Local calibrated models and recordings
+*.pkl
+*.mp4
+*.avi
+*.mov
+*.mkv
