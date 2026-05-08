@@ -10,25 +10,25 @@ export default function BasicNeedsOther() {
       <div className="quadrant-container">
         <button
           className="quadrant-btn top-left"
-          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Temperature', path: ['basic-needs', 'temperature'] } })}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Temperature', path: ['basic_needs', 'temperature'] } })}
         >
           Temperature
         </button>
         <button
           className="quadrant-btn top-right"
-          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Blanket', path: ['basic-needs', 'blanket'] } })}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Blanket', path: ['basic_needs', 'blanket'] } })}
         >
           Blanket
         </button>
         <button
           className="quadrant-btn bottom-left"
-          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Lighting', path: ['basic-needs', 'lighting'] } })}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Lighting', path: ['basic_needs', 'lighting'] } })}
         >
           Lighting
         </button>
         <button
           className="quadrant-btn bottom-right"
-          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Body position', path: ['basic-needs', 'body-position'] } })}
+          {...getNavigationProps('/patient/final-answer', { state: { source: 'basic-needs', request: 'Body position', path: ['basic_needs', 'body position'] } })}
         >
           Body position
         </button>

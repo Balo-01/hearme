@@ -1,28 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import '../../App.css';
 import { useRequests } from '../../context/RequestsContext.jsx';
 
 export default function Nurse() {
   const { requests, dismissRequest } = useRequests();
-  const [selectedRequestId, setSelectedRequestId] = useState(
-    requests[0]?.id || null,
-  );
-
-  useEffect(() => {
-    if (requests.length === 0) {
-      setSelectedRequestId(null);
-      return;
-    }
-    const requestStillExists = requests.some(
-      (request) => request.id === selectedRequestId,
-    );
-    if (!requestStillExists) {
-      setSelectedRequestId(requests[0].id);
-    }
-  }, [requests, selectedRequestId]);
+  const [selectedRequestId, setSelectedRequestId] = useState(null);
 
   const selectedRequest = useMemo(
-    () => requests.find((request) => request.id === selectedRequestId),
+    () => requests.find((request) => request.id === selectedRequestId) || requests[0] || null,
     [requests, selectedRequestId],
   );
 

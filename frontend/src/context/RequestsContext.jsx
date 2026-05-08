@@ -1,5 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { getActiveRequests, createRequest, dismissRequest as dismissRequestApi } from '../services/requestsApi';
+import {
+  DEFAULT_PATIENT_ID,
+  getActiveRequests,
+  createRequest,
+  dismissRequest as dismissRequestApi,
+} from '../services/requestsApi';
 import { usePatient } from './PatientContext';
 
 const RequestsContext = createContext(null);
@@ -18,13 +23,17 @@ const buildPatientHistory = () => [
   'Future version: patient-specific history from backend + AI context.',
 ];
 
+const normalizeCategoryForUi = (category) => (
+  String(category || 'general').toLowerCase().replace(/_/g, '-')
+);
+
 // Maps a raw backend request object to the shape expected by the UI.
 // `source` and `requestText` are optional — used when creating a new request locally
 // before re-fetching from backend (optimistic update).
 const mapBackendRequest = (backendReq, source, requestText) => {
   const createdDate = new Date(backendReq.created_at);
   const path = Array.isArray(backendReq.path) ? backendReq.path : [];
-  const category = source || (path.length > 0 ? path[0].toLowerCase() : 'general');
+  const category = normalizeCategoryForUi(source || (path.length > 0 ? path[0] : 'general'));
 
   // Use passed requestText, or derive from path
   // For pain: show "location pain - intensity" (e.g., "stomach pain - unbearable")
@@ -45,7 +54,7 @@ const mapBackendRequest = (backendReq, source, requestText) => {
     status: backendReq.status,
     created_at: backendReq.created_at,
     createdAt: createdDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    category: String(category).toLowerCase(),
+    category,
     rawRequest: String(rawRequest).toLowerCase(),
     aiRephrasedRequest: buildAiRephrasedRequest(rawRequest, category),
     patientHistory: buildPatientHistory(),
@@ -85,7 +94,7 @@ export function RequestsProvider({ children }) {
       // Sends a new request to the backend and adds it to the local list immediately.
       // Uses patientId from context if available, otherwise falls back to default.
       addRequest: async ({ source, request, path, patientId: overriddenPatientId }) => {
-        const effectivePatientId = overriddenPatientId || patientId || '1d604da9-9a81-4ba9-80c2-de3375d59b40';
+        const effectivePatientId = overriddenPatientId || patientId || DEFAULT_PATIENT_ID;
         const backendRequest = await createRequest(
           effectivePatientId,
           path || [source]

@@ -2,3 +2,5 @@ pandas
 oracledb
 python-dotenv
 openai>=1.78.0
+fastapi
+uvicorn[standard]
