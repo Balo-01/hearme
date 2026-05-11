@@ -1,14 +1,10 @@
 import '../../../App.css';
 import useCategoryRecommendations from '../../../hooks/useCategoryRecommendations';
 import useHoverNavigate from '../../../hooks/useHoverNavigate';
-import {
-  firstUnusedRecommendation,
-  toCommunicationOption,
-} from '../../../utils/recommendationOptions';
+import { toCommunicationOption } from '../../../utils/recommendationOptions';
 
-const COMMUNICATION_OPTIONS = ['call nurse', 'call family', 'call doctor', 'call cleaning'];
-const COMMUNICATION_FALLBACKS = COMMUNICATION_OPTIONS.slice(0, 3);
-const BUTTON_POSITIONS = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+const COMMUNICATION_FALLBACKS = ['call nurse', 'call family', 'call doctor'];
+const RECOMMENDATION_POSITIONS = ['top-left', 'top-right', 'bottom-left'];
 
 export default function Communication() {
   const { getNavigationProps } = useHoverNavigate(3000);
@@ -16,8 +12,7 @@ export default function Communication() {
     'communication',
     COMMUNICATION_FALLBACKS,
   );
-  const finalOption = firstUnusedRecommendation(COMMUNICATION_OPTIONS, recommendations) || COMMUNICATION_OPTIONS[3];
-  const options = [...recommendations, finalOption].slice(0, 4).map(toCommunicationOption);
+  const options = recommendations.map(toCommunicationOption);
 
   return (
     <>
@@ -28,13 +23,19 @@ export default function Communication() {
         {options.map((option, index) => (
           <button
             key={option.state.path.join(':')}
-            className={`quadrant-btn ${BUTTON_POSITIONS[index]}`}
+            className={`quadrant-btn ${RECOMMENDATION_POSITIONS[index]}`}
             disabled={isLoading}
             {...(isLoading ? {} : getNavigationProps(option.to, { state: option.state }))}
           >
             {option.label}
           </button>
         ))}
+        <button
+          className="quadrant-btn bottom-right"
+          {...getNavigationProps('/patient/communication/other')}
+        >
+          Other
+        </button>
       </div>
     </>
   );
