@@ -1,7 +1,6 @@
 import json
 import os
 import sys
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, List, Optional
@@ -19,11 +18,6 @@ if str(ROOT_DIR) not in sys.path:
 from agent.recommendation_agent import CATEGORY_OPTIONS, get_recommendations
 
 load_dotenv()
-
-RECOMMENDATION_CACHE_TTL_SECONDS = int(
-    os.getenv("RECOMMENDATION_CACHE_TTL_SECONDS", "300")
-)
-_recommendation_cache = {}
 
 DB_CONFIG = {
     "user": os.getenv("DB_USER"),
@@ -92,23 +86,6 @@ def _normalize_recommendation_category(value: str) -> str:
             detail=f"Invalid recommendation category. Expected one of: {valid_categories}",
         )
     return category
-
-
-def _get_cached_recommendations(patient_id: str, category: str) -> Optional[dict]:
-    cached = _recommendation_cache.get((patient_id, category))
-    if not cached:
-        return None
-
-    cached_at, result = cached
-    if time.monotonic() - cached_at > RECOMMENDATION_CACHE_TTL_SECONDS:
-        _recommendation_cache.pop((patient_id, category), None)
-        return None
-
-    return result
-
-
-def _set_cached_recommendations(patient_id: str, category: str, result: dict) -> None:
-    _recommendation_cache[(patient_id, category)] = (time.monotonic(), result)
 
 
 def get_connection() -> oracledb.Connection:
@@ -213,14 +190,9 @@ def get_patient_recommendations(
 ):
     normalized_patient_id = patient_id.strip()
     normalized_category = _normalize_recommendation_category(category)
-    cached_result = _get_cached_recommendations(normalized_patient_id, normalized_category)
-
-    if cached_result:
-        return cached_result
 
     try:
         result = get_recommendations(normalized_patient_id, normalized_category)
-        _set_cached_recommendations(normalized_patient_id, normalized_category, result)
         return result
     except ValueError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc

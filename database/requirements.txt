@@ -1,5 +1,0 @@
-pandas
-oracledb
-python-dotenv
-fastapi
-uvicorn
