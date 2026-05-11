@@ -1,5 +1,6 @@
-# Python
+﻿# Python
 __pycache__/
+agent/__pycache__/
 *.py[cod]
 *.pyo
 *.pyd
@@ -20,6 +21,7 @@ pip-wheel-metadata/
 htmlcov/
 create-user.sql
 questions.txt
+database/config.txt
 
 # Python build artifacts
 build/

@@ -12,6 +12,7 @@ export function PatientProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function usePatient() {
   const context = useContext(PatientContext);
   if (!context) {

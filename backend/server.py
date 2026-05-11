@@ -1,6 +1,8 @@
 import json
 import os
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, List, Optional
 
 import oracledb
@@ -8,6 +10,12 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from agent.recommendation_agent import CATEGORY_OPTIONS, get_recommendations
 
 load_dotenv()
 
@@ -57,6 +65,27 @@ class PatientRequest(BaseModel):
     status: str
     created_at: datetime
     dismissed_at: Optional[datetime] = None
+
+
+class RecommendationResponse(BaseModel):
+    patient_id: str
+    category: str
+    recommendations: List[str]
+
+
+def _normalize_request_type(value: str) -> str:
+    return str(value).strip().lower().replace("-", "_")
+
+
+def _normalize_recommendation_category(value: str) -> str:
+    category = _normalize_request_type(value)
+    if category not in CATEGORY_OPTIONS:
+        valid_categories = ", ".join(CATEGORY_OPTIONS)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid recommendation category. Expected one of: {valid_categories}",
+        )
+    return category
 
 
 def get_connection() -> oracledb.Connection:
@@ -154,10 +183,27 @@ def health():
     return {"status": "ok"}
 
 
+@app.get("/recommendations", response_model=RecommendationResponse)
+def get_patient_recommendations(
+    patient_id: str = Query(..., min_length=1),
+    category: str = Query(..., min_length=1),
+):
+    normalized_patient_id = patient_id.strip()
+    normalized_category = _normalize_recommendation_category(category)
+
+    try:
+        result = get_recommendations(normalized_patient_id, normalized_category)
+        return result
+    except ValueError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to generate recommendations") from exc
+
+
 @app.post("/requests", response_model=PatientRequest)
 def create_request(data: PatientRequestCreate):
     created_at = datetime.now(timezone.utc).replace(tzinfo=None)
-    request_type = data.path[0][:100]
+    request_type = _normalize_request_type(data.path[0])[:100]
     description = " > ".join(data.path)[:500]
     path_json = json.dumps(data.path)
 

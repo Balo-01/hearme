@@ -122,6 +122,11 @@
   right: clamp(26px, 4vw, 52px);
 }
 
+.quadrant-btn:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
 /* Icon sizing inside each button. */
 .quadrant-btn .icon {
   font-size: clamp(2.7rem, 5.5vw, 3.6rem);
@@ -145,6 +150,14 @@
   filter: saturate(1.16) brightness(1.06);
   z-index: 20;
   outline: none;
+}
+
+.quadrant-btn:disabled:hover,
+.quadrant-btn:disabled:focus {
+  transform: scale(1);
+  box-shadow: 0 14px 30px rgba(15, 35, 66, 0.16);
+  filter: none;
+  z-index: auto;
 }
 
 /* Nurse dashboard layout: left request list and right detail view. */

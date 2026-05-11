@@ -108,14 +108,72 @@ py .\patient_requests_history.py
 
 You can also run database/populate_requests.sql if you want to add test data into the requests table.
 
-## Step 7 - Run the FastAPI Request Server
+## Step 7 - Configure the Recommendation Agent
 
-The frontend should be added separately and call this backend over HTTP.
+Add your OpenAI API key to the `.env` file:
+
+```dotenv
+OPENAI_API_KEY=your_openai_api_key
+```
+
+Install agent dependencies:
+
+```powershell
+pip install -r requirements.txt
+```
+
+## Agent Logic
+
+The recommendation agent is in `agent/recommendation_agent.py` and exposes a single function:
+
+```python
+get_recommendations(patient_id: str, category: str) -> dict
+```
+
+It returns exactly 3 recommendations for the given patient and category.
+
+### Categories
+
+| Category | Valid options |
+|---|---|
+| `pain` | head pain, back pain, stomach pain |
+| `basic_needs` | water, food, toilet, blanket, temperature, lighting, body position |
+| `communication` | call nurse, call family, call doctor, call cleaning |
+
+### How it works
+
+1. The agent sends the patient ID and category to `gpt-4o-mini` with two tool definitions:
+   - `get_patient_medical_history` — fetches conditions, procedures, observations, medications, allergies
+   - `get_patient_requests_history` — fetches the summarized request history for the given category
+2. For `pain`, the model calls both tools. For `basic_needs` and `communication`, it calls request history only.
+3. The model uses the fetched data and the predefined option list for the category to pick the 3 most relevant recommendations.
+4. The response is parsed from JSON and validated to contain exactly 3 items.
+
+### Output shape
+
+```json
+{
+  "patient_id": "...",
+  "category": "pain",
+  "recommendations": ["head pain", "back pain", "stomach pain"]
+}
+```
+
+### Test the agent
+
+```powershell
+py tests/test_recommendation_agent.py
+py tests/test_recommendation_agent.py <patient_uuid> <category>
+```
+
+## Step 8 - Run the FastAPI Backend
+
+The frontend calls this backend over HTTP for request submission, nurse dashboard polling, and AI recommendations.
 
 Start the API from the repository root:
 
 ```powershell
-uvicorn server:app --reload
+python -m uvicorn backend.server:app --reload
 ```
 
 The backend runs at:
@@ -129,6 +187,7 @@ Request API examples:
 Invoke-RestMethod -Method Post -Uri http://localhost:8000/requests -ContentType "application/json" -Body '{"patient_id":"10339b10-3cd1-4ac3-ac13-ec26728cb592","path":["pain","severe"]}'
 Invoke-RestMethod -Uri "http://localhost:8000/requests?status=active"
 Invoke-RestMethod -Method Patch -Uri http://localhost:8000/requests/1/dismiss
+Invoke-RestMethod -Uri "http://localhost:8000/recommendations?patient_id=10339b10-3cd1-4ac3-ac13-ec26728cb592&category=basic_needs"
 ```
 
 For local frontend development, CORS is enabled for:
