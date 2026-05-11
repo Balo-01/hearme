@@ -3,9 +3,6 @@ import { usePatient } from '../context/PatientContext';
 import { DEFAULT_PATIENT_ID, getRecommendations } from '../services/requestsApi';
 import { normalizeRecommendation, recommendationKey } from '../utils/recommendationOptions';
 
-const recommendationCache = new Map();
-const inFlightRecommendations = new Map();
-
 function normalizeCategory(category) {
   return String(category || '').trim().toLowerCase().replace(/-/g, '_');
 }
@@ -30,30 +27,13 @@ function mergeWithFallback(recommendations, fallbackRecommendations) {
 }
 
 function loadRecommendations(patientId, category) {
-  const cacheKey = `${patientId}:${category}`;
-
-  if (recommendationCache.has(cacheKey)) {
-    return Promise.resolve(recommendationCache.get(cacheKey));
-  }
-
-  if (inFlightRecommendations.has(cacheKey)) {
-    return inFlightRecommendations.get(cacheKey);
-  }
-
-  const request = getRecommendations(patientId, category)
+  return getRecommendations(patientId, category)
     .then((data) => {
       const recommendations = Array.isArray(data?.recommendations)
         ? data.recommendations
         : [];
-      recommendationCache.set(cacheKey, recommendations);
       return recommendations;
-    })
-    .finally(() => {
-      inFlightRecommendations.delete(cacheKey);
     });
-
-  inFlightRecommendations.set(cacheKey, request);
-  return request;
 }
 
 export default function useCategoryRecommendations(category, fallbackRecommendations) {
