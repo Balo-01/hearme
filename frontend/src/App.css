@@ -303,6 +303,63 @@
   background: #e8edf7;
 }
 
+.nurse-filter-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.nurse-status-toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nurse-toggle-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1d4679;
+  min-width: 70px;
+  text-align: right;
+}
+
+.nurse-status-toggle {
+  position: relative;
+  width: 48px;
+  height: 24px;
+  border: 1px solid rgba(45, 109, 188, 0.35);
+  border-radius: 12px;
+  background: #eaf3ff;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.nurse-status-toggle.active {
+  background: #c7e3ff;
+}
+
+.nurse-status-toggle.done {
+  background: #d4edda;
+}
+
+.nurse-toggle-handle {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: left 0.3s ease;
+  left: 3px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nurse-status-toggle.done .nurse-toggle-handle {
+  left: 27px;
+}
+
 .nurse-filter-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
@@ -411,9 +468,21 @@
 .nurse-request-item-top {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
   color: #21436f;
   font-size: 0.84rem;
   margin-bottom: 7px;
+}
+
+.nurse-patient-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nurse-patient-id-line {
+  font-size: 0.78rem;
+  color: #4a678e;
 }
 
 .nurse-request-item-main {

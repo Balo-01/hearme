@@ -8,6 +8,7 @@ export default function Nurse() {
   const [showPatientFilter, setShowPatientFilter] = useState(false);
   const [patientIdInput, setPatientIdInput] = useState('');
   const [activePatientIdFilter, setActivePatientIdFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('active');
 
   const normalizedActiveFilter = activePatientIdFilter.trim().toLowerCase();
 
@@ -24,14 +25,16 @@ export default function Nurse() {
   }, [requests]);
 
   const filteredRequests = useMemo(() => {
+    let result = sortedRequests.filter((request) => request.status === statusFilter);
+
     if (!normalizedActiveFilter) {
-      return sortedRequests;
+      return result;
     }
 
-    return sortedRequests.filter(
+    return result.filter(
       (request) => String(request.patient_id).trim().toLowerCase() === normalizedActiveFilter,
     );
-  }, [sortedRequests, normalizedActiveFilter]);
+  }, [sortedRequests, normalizedActiveFilter, statusFilter]);
 
   const selectedRequest = useMemo(
     () => filteredRequests.find((request) => request.id === selectedRequestId) || filteredRequests[0] || null,
@@ -63,13 +66,31 @@ export default function Nurse() {
         <aside className="nurse-list-panel">
           <div className="nurse-list-header">
             <h2>Incoming requests</h2>
-            <button
-              type="button"
-              className="nurse-filter-toggle-btn"
-              onClick={() => setShowPatientFilter((previous) => !previous)}
-            >
-              Filter by patient
-            </button>
+            <div className="nurse-filter-controls">
+              <div className="nurse-status-toggle-container">
+                <label htmlFor="status-toggle" className="nurse-toggle-label">
+                  {statusFilter === 'active' ? 'Unresolved' : 'Resolved'}
+                </label>
+                <button
+                  id="status-toggle"
+                  type="button"
+                  className={`nurse-status-toggle ${statusFilter === 'active' ? 'active' : 'done'}`}
+                  onClick={() =>
+                    setStatusFilter(statusFilter === 'active' ? 'done' : 'active')
+                  }
+                  aria-label={`Toggle between unresolved and resolved requests (currently showing ${statusFilter} requests)`}
+                >
+                  <span className="nurse-toggle-handle" />
+                </button>
+              </div>
+              <button
+                type="button"
+                className="nurse-filter-toggle-btn"
+                onClick={() => setShowPatientFilter((previous) => !previous)}
+              >
+                Filter by patient
+              </button>
+            </div>
           </div>
           {showPatientFilter ? (
             <div className="nurse-filter-row">
@@ -117,7 +138,10 @@ export default function Nurse() {
                   onClick={() => setSelectedRequestId(request.id)}
                 >
                   <div className="nurse-request-item-top">
-                    <span>Patient ID: {request.patient_id}</span>
+                    <div className="nurse-patient-lines">
+                      <span>Patient: {request.patientDisplayName}</span>
+                      <span className="nurse-patient-id-line">ID: {request.patient_id}</span>
+                    </div>
                     <span>{request.createdAt}</span>
                   </div>
                   <div className="nurse-request-item-main">
@@ -129,16 +153,18 @@ export default function Nurse() {
                     </div>
                   </div>
                   <div className="nurse-request-actions">
-                    <button
-                      type="button"
-                      className="nurse-request-resolve-btn"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleResolveRequest(request.id);
-                      }}
-                    >
-                      Resolve
-                    </button>
+                    {request.status === 'active' ? (
+                      <button
+                        type="button"
+                        className="nurse-request-resolve-btn"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleResolveRequest(request.id);
+                        }}
+                      >
+                        Resolve
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               );
@@ -146,8 +172,8 @@ export default function Nurse() {
             {filteredRequests.length === 0 ? (
               <div className="nurse-empty-state">
                 {normalizedActiveFilter
-                  ? 'No requests found for this patient ID.'
-                  : 'No active requests.'}
+                  ? `No ${statusFilter === 'active' ? 'unresolved' : 'resolved'} requests found for this patient ID.`
+                  : `No ${statusFilter === 'active' ? 'unresolved' : 'resolved'} requests.`}
               </div>
             ) : null}
           </div>

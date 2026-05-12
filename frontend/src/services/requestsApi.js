@@ -3,7 +3,7 @@ export const DEFAULT_PATIENT_ID = '1d604da9-9a81-4ba9-80c2-de3375d59b40';
 
 export async function getActiveRequests() {
   // Returns all requests (active + dismissed) for displaying complete history
-  const response = await fetch(`${API_BASE_URL}/requests`);
+  const response = await fetch(`${API_BASE_URL}/requests?status=all`);
 
   if (!response.ok) {
     throw new Error(`Failed to load requests (${response.status})`);
