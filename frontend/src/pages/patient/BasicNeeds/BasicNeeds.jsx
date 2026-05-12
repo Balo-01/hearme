@@ -7,7 +7,7 @@ const BASIC_NEEDS_FALLBACKS = ['water', 'food', 'toilet'];
 const RECOMMENDATION_POSITIONS = ['top-left', 'top-right', 'bottom-left'];
 
 export default function BasicNeeds() {
-  const { getNavigationProps } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(4000);
   const { recommendations, isLoading } = useCategoryRecommendations(
     'basic_needs',
     BASIC_NEEDS_FALLBACKS,

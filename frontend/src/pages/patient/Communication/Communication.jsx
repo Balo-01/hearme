@@ -7,7 +7,7 @@ const COMMUNICATION_FALLBACKS = ['call nurse', 'call family', 'call doctor'];
 const RECOMMENDATION_POSITIONS = ['top-left', 'top-right', 'bottom-left'];
 
 export default function Communication() {
-  const { getNavigationProps } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(4000);
   const { recommendations, isLoading } = useCategoryRecommendations(
     'communication',
     COMMUNICATION_FALLBACKS,

@@ -7,7 +7,7 @@ const PAIN_FALLBACKS = ['head pain', 'stomach pain', 'back pain'];
 const RECOMMENDATION_POSITIONS = ['top-left', 'top-right', 'bottom-left'];
 
 export default function Pain() {
-  const { getNavigationProps } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(4000);
   const { recommendations, isLoading } = useCategoryRecommendations('pain', PAIN_FALLBACKS);
   const options = recommendations.map(toPainOption);
 

@@ -5,11 +5,11 @@ import { useRequests } from '../../context/RequestsContext.jsx';
 export default function Nurse() {
   const { requests, dismissRequest } = useRequests();
   const [selectedRequestId, setSelectedRequestId] = useState(null);
+  const [showPatientFilter, setShowPatientFilter] = useState(false);
+  const [patientIdInput, setPatientIdInput] = useState('');
+  const [activePatientIdFilter, setActivePatientIdFilter] = useState('');
 
-  const selectedRequest = useMemo(
-    () => requests.find((request) => request.id === selectedRequestId) || requests[0] || null,
-    [requests, selectedRequestId],
-  );
+  const normalizedActiveFilter = activePatientIdFilter.trim().toLowerCase();
 
   const sortedRequests = useMemo(() => {
     return [...requests].sort((left, right) => {
@@ -23,8 +23,35 @@ export default function Nurse() {
     });
   }, [requests]);
 
+  const filteredRequests = useMemo(() => {
+    if (!normalizedActiveFilter) {
+      return sortedRequests;
+    }
+
+    return sortedRequests.filter(
+      (request) => String(request.patient_id).trim().toLowerCase() === normalizedActiveFilter,
+    );
+  }, [sortedRequests, normalizedActiveFilter]);
+
+  const selectedRequest = useMemo(
+    () => filteredRequests.find((request) => request.id === selectedRequestId) || filteredRequests[0] || null,
+    [filteredRequests, selectedRequestId],
+  );
+
   const handleResolveRequest = (resolvedRequestId) => {
     dismissRequest(resolvedRequestId);
+  };
+
+  const applyPatientFilter = () => {
+    const normalizedValue = patientIdInput.trim();
+    setActivePatientIdFilter(normalizedValue);
+    setSelectedRequestId(null);
+  };
+
+  const clearPatientFilter = () => {
+    setPatientIdInput('');
+    setActivePatientIdFilter('');
+    setSelectedRequestId(null);
   };
 
   return (
@@ -34,9 +61,53 @@ export default function Nurse() {
       </header>
       <div className="nurse-layout">
         <aside className="nurse-list-panel">
-          <h2>Incoming requests</h2>
+          <div className="nurse-list-header">
+            <h2>Incoming requests</h2>
+            <button
+              type="button"
+              className="nurse-filter-toggle-btn"
+              onClick={() => setShowPatientFilter((previous) => !previous)}
+            >
+              Filter by patient
+            </button>
+          </div>
+          {showPatientFilter ? (
+            <div className="nurse-filter-row">
+              <input
+                type="text"
+                className="nurse-filter-input"
+                placeholder="Enter patient ID"
+                value={patientIdInput}
+                onChange={(event) => setPatientIdInput(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    applyPatientFilter();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="nurse-filter-apply-btn"
+                onClick={applyPatientFilter}
+              >
+                Apply
+              </button>
+              <button
+                type="button"
+                className="nurse-filter-clear-btn"
+                onClick={clearPatientFilter}
+              >
+                Clear
+              </button>
+            </div>
+          ) : null}
+          {normalizedActiveFilter ? (
+            <div className="nurse-filter-active-note">
+              Showing requests for patient ID: {activePatientIdFilter}
+            </div>
+          ) : null}
           <div className="nurse-request-list">
-            {sortedRequests.map((request) => {
+            {filteredRequests.map((request) => {
               const isActive = request.id === selectedRequest?.id;
               const isEmergency = request.category === "emergency";
               return (
@@ -72,8 +143,12 @@ export default function Nurse() {
                 </div>
               );
             })}
-            {requests.length === 0 ? (
-              <div className="nurse-empty-state">No active requests.</div>
+            {filteredRequests.length === 0 ? (
+              <div className="nurse-empty-state">
+                {normalizedActiveFilter
+                  ? 'No requests found for this patient ID.'
+                  : 'No active requests.'}
+              </div>
             ) : null}
           </div>
         </aside>
