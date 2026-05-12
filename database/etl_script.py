@@ -39,6 +39,32 @@ def generate_contact_number():
     return f"+40 7{random.randint(0, 9)} {random.randint(100, 999)} {random.randint(100, 999)}"
 
 
+def generate_cnp(birthdate, gender):
+    """Generate a Romanian CNP (Personal Numeric Code) based on birthdate and gender."""
+    year = birthdate.year
+    month = birthdate.month
+    day = birthdate.day
+
+    if 1900 <= year <= 1999:
+        s = 1 if gender == 'M' else 2
+    elif 2000 <= year <= 2099:
+        s = 5 if gender == 'M' else 6
+    else:
+        s = 3 if gender == 'M' else 4
+
+    yy = year % 100
+    county = random.randint(1, 46)
+    sequence = random.randint(1, 999)
+
+    base = f"{s}{yy:02d}{month:02d}{day:02d}{county:02d}{sequence:03d}"
+
+    weights = [2, 7, 9, 1, 4, 6, 3, 5, 8, 2, 7, 9]
+    remainder = sum(int(base[i]) * weights[i] for i in range(12)) % 11
+    control = 1 if remainder == 10 else remainder
+
+    return base + str(control)
+
+
 def parse_date(date_str):
     """Parse date from various formats."""
     if pd.isna(date_str) or date_str == '':
@@ -73,12 +99,13 @@ def load_patients(connection):
         lastname = clean_name(row['LAST'])
         gender = row['GENDER'] if row['GENDER'] in ('M', 'F') else None
         contact_number = generate_contact_number()
+        cnp = generate_cnp(birthdate, gender) if gender else None
         
         try:
             cursor.execute("""
-                INSERT INTO patients (id, birthdate, firstname, lastname, gender, contact_number)
-                VALUES (:1, :2, :3, :4, :5, :6)
-            """, [patient_id, birthdate, firstname, lastname, gender, contact_number])
+                INSERT INTO patients (id, birthdate, firstname, lastname, gender, contact_number, cnp)
+                VALUES (:1, :2, :3, :4, :5, :6, :7)
+            """, [patient_id, birthdate, firstname, lastname, gender, contact_number, cnp])
             inserted_ids.add(patient_id)
             number_of_patients += 1
         except oracledb.IntegrityError as e:

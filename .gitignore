@@ -22,6 +22,7 @@ htmlcov/
 create-user.sql
 questions.txt
 database/config.txt
+database/test_id.txt
 
 # Python build artifacts
 build/
