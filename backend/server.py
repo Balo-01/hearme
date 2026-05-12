@@ -61,6 +61,7 @@ class PatientRequestCreate(BaseModel):
 class PatientRequest(BaseModel):
     id: str
     patient_id: str
+    patient_name: Optional[str] = None
     path: List[str]
     status: str
     created_at: datetime
@@ -143,11 +144,28 @@ def _parse_path(path_value: Any, request_type: Optional[str], description: Optio
     return []
 
 
+def _format_patient_name(firstname: Optional[str], lastname: Optional[str]) -> Optional[str]:
+    name = " ".join(part for part in [firstname, lastname] if part)
+    return name or None
+
+
 def _row_to_request(row: tuple) -> PatientRequest:
-    request_id, patient_id, path, status, created_at, dismissed_at, request_type, description = row
+    (
+        request_id,
+        patient_id,
+        patient_firstname,
+        patient_lastname,
+        path,
+        status,
+        created_at,
+        dismissed_at,
+        request_type,
+        description,
+    ) = row
     return PatientRequest(
         id=str(request_id),
         patient_id=patient_id,
+        patient_name=_format_patient_name(patient_firstname, patient_lastname),
         path=_parse_path(path, request_type, description),
         status=status,
         created_at=_as_utc_datetime(created_at),
@@ -159,9 +177,20 @@ def _select_request_by_id(connection: oracledb.Connection, request_id: int) -> O
     cursor = connection.cursor()
     cursor.execute(
         """
-        SELECT id, patient_id, path, status, request_date, dismissed_at, request_type, description
-        FROM requests
-        WHERE id = :request_id
+        SELECT
+            r.id,
+            r.patient_id,
+            p.firstname,
+            p.lastname,
+            r.path,
+            r.status,
+            r.request_date,
+            r.dismissed_at,
+            r.request_type,
+            r.description
+        FROM requests r
+        LEFT JOIN patients p ON p.id = r.patient_id
+        WHERE r.id = :request_id
         """,
         {"request_id": request_id},
     )
@@ -263,17 +292,28 @@ def create_request(data: PatientRequestCreate):
 @app.get("/requests", response_model=List[PatientRequest])
 def get_requests(status: Optional[str] = Query(default="active")):
     query = """
-        SELECT id, patient_id, path, status, request_date, dismissed_at, request_type, description
-        FROM requests
+        SELECT
+            r.id,
+            r.patient_id,
+            p.firstname,
+            p.lastname,
+            r.path,
+            r.status,
+            r.request_date,
+            r.dismissed_at,
+            r.request_type,
+            r.description
+        FROM requests r
+        LEFT JOIN patients p ON p.id = r.patient_id
     """
     params = {}
 
     normalized_status = status.strip().lower() if status is not None else "active"
     if normalized_status and normalized_status != "all":
-        query += " WHERE status = :status"
+        query += " WHERE r.status = :status"
         params["status"] = normalized_status
 
-    query += " ORDER BY request_date NULLS LAST, id"
+    query += " ORDER BY r.request_date NULLS LAST, r.id"
 
     connection = get_connection()
     try:
@@ -282,6 +322,48 @@ def get_requests(status: Optional[str] = Query(default="active")):
         return [_row_to_request(row) for row in cursor.fetchall()]
     except oracledb.DatabaseError as exc:
         raise HTTPException(status_code=500, detail="Failed to load requests") from exc
+    finally:
+        connection.close()
+
+
+@app.get("/requests/{patient_id}", response_model=List[PatientRequest])
+def get_patient_requests(patient_id: str, status: Optional[str] = Query(default="active")):
+    normalized_patient_id = patient_id.strip()
+    if not normalized_patient_id:
+        raise HTTPException(status_code=400, detail="patient_id is required")
+
+    query = """
+        SELECT
+            r.id,
+            r.patient_id,
+            p.firstname,
+            p.lastname,
+            r.path,
+            r.status,
+            r.request_date,
+            r.dismissed_at,
+            r.request_type,
+            r.description
+        FROM requests r
+        LEFT JOIN patients p ON p.id = r.patient_id
+        WHERE r.patient_id = :patient_id
+    """
+    params = {"patient_id": normalized_patient_id}
+
+    normalized_status = status.strip().lower() if status is not None else "active"
+    if normalized_status and normalized_status != "all":
+        query += " AND r.status = :status"
+        params["status"] = normalized_status
+
+    query += " ORDER BY r.request_date NULLS LAST, r.id"
+
+    connection = get_connection()
+    try:
+        cursor = connection.cursor()
+        cursor.execute(query, params)
+        return [_row_to_request(row) for row in cursor.fetchall()]
+    except oracledb.DatabaseError as exc:
+        raise HTTPException(status_code=500, detail="Failed to load patient requests") from exc
     finally:
         connection.close()
 
