@@ -19,7 +19,7 @@ def _split_datetime(value):
     if value is None:
         return None, None
     if isinstance(value, datetime):
-        return value.date().isoformat(), value.time().isoformat()
+        return value.date().isoformat(), value.time().strftime("%H:%M:%S")
     return None, None
 
 
@@ -71,7 +71,6 @@ def get_patient_requests(patient_id, request_type, connection=None):
                     "date": date_component,
                     "time": time_component,
                     "request": description,
-                    "type": req_type,
                 }
             )
 

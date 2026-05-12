@@ -71,6 +71,7 @@ def get_patient_history(patient_id, connection=None):
                 {
                     "start_date": _to_iso_date(start_date),
                     "stop_date": _to_iso_date(stop_date),
+                    "status": "resolved" if stop_date else "active",
                     "description": description,
                 }
             )
@@ -80,7 +81,8 @@ def get_patient_history(patient_id, connection=None):
             SELECT procedure_date, description, reason
             FROM procedures
             WHERE patient = :patient_id
-            ORDER BY procedure_date, id
+            ORDER BY procedure_date DESC, id DESC
+            FETCH FIRST 5 ROWS ONLY
             """,
             {"patient_id": patient_id},
         )
@@ -108,6 +110,7 @@ def get_patient_history(patient_id, connection=None):
                 {
                     "start_date": _to_iso_date(start_date),
                     "stop_date": _to_iso_date(stop_date),
+                    "status": "active" if stop_date is None else "recently stopped",
                     "description": description,
                     "reason": reason,
                 }
@@ -123,7 +126,7 @@ def get_patient_history(patient_id, connection=None):
             {"patient_id": patient_id},
         )
         for (description,) in cursor.fetchall():
-            medical_history["allergies"].append({"description": description})
+            medical_history["allergies"].append(description)
 
         return medical_history
     finally:
@@ -132,7 +135,7 @@ def get_patient_history(patient_id, connection=None):
 
 def main():
     """Example usage."""
-    patient_id = 'b58731cc-2d8b-4c2d-b327-4cab771af3ef' 
+    patient_id = '10339b10-3cd1-4ac3-ac13-ec26728cb592' 
     medical_history = get_patient_history(patient_id)
     print(json.dumps(medical_history, indent=2, ensure_ascii=False))
 
