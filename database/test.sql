@@ -1,1 +1,0 @@
-select * from allergies where patient_id='b58731cc-2d8b-4c2d-b327-4cab771af3ef';

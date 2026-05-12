@@ -50,7 +50,6 @@ def get_patient_history(patient_id, connection=None):
             "gender": patient_row[1] if patient_row else None,
             "conditions": [],
             "procedures": [],
-            "observations": [],
             "medications": [],
             "allergies": [],
         }
@@ -96,30 +95,10 @@ def get_patient_history(patient_id, connection=None):
 
         cursor.execute(
             """
-            SELECT observation_date, description, value, units, type
-            FROM observations
-            WHERE patient = :patient_id
-            ORDER BY observation_date, id
-            """,
-            {"patient_id": patient_id},
-        )
-        for observation_date, description, value, units, observation_type in cursor.fetchall():
-            medical_history["observations"].append(
-                {
-                    "observation_date": _to_iso_date(observation_date),
-                    "description": description,
-                    "value": value,
-                    "units": units,
-                    "type": observation_type,
-                }
-            )
-
-        cursor.execute(
-            """
             SELECT start_date, stop_date, description, reason
             FROM medications
             WHERE patient = :patient_id
-            AND stop_date IS NULL
+            AND (stop_date IS NULL OR stop_date >= TRUNC(SYSDATE) - 30)
             ORDER BY start_date, id
             """,
             {"patient_id": patient_id},
@@ -153,7 +132,7 @@ def get_patient_history(patient_id, connection=None):
 
 def main():
     """Example usage."""
-    patient_id = '10339b10-3cd1-4ac3-ac13-ec26728cb592' 
+    patient_id = 'b58731cc-2d8b-4c2d-b327-4cab771af3ef' 
     medical_history = get_patient_history(patient_id)
     print(json.dumps(medical_history, indent=2, ensure_ascii=False))
 
