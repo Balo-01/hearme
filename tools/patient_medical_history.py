@@ -119,6 +119,7 @@ def get_patient_history(patient_id, connection=None):
             SELECT start_date, stop_date, description, reason
             FROM medications
             WHERE patient = :patient_id
+            AND stop_date IS NULL
             ORDER BY start_date, id
             """,
             {"patient_id": patient_id},
