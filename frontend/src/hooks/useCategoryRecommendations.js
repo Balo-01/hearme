@@ -32,7 +32,8 @@ function loadRecommendations(patientId, category) {
       const recommendations = Array.isArray(data?.recommendations)
         ? data.recommendations
         : [];
-      return recommendations;
+      const summary = typeof data?.summary === 'string' ? data.summary : '';
+      return { recommendations, summary };
     });
 }
 
@@ -48,6 +49,7 @@ export default function useCategoryRecommendations(category, fallbackRecommendat
   const [result, setResult] = useState({
     cacheKey: null,
     recommendations: fallbackList,
+    summary: '',
     error: null,
   });
 
@@ -55,7 +57,7 @@ export default function useCategoryRecommendations(category, fallbackRecommendat
     let isCancelled = false;
 
     loadRecommendations(effectivePatientId, normalizedCategory)
-      .then((loadedRecommendations) => {
+      .then(({ recommendations: loadedRecommendations, summary }) => {
         if (isCancelled) {
           return;
         }
@@ -63,6 +65,7 @@ export default function useCategoryRecommendations(category, fallbackRecommendat
         setResult({
           cacheKey,
           recommendations: mergeWithFallback(loadedRecommendations, fallbackList),
+          summary,
           error: null,
         });
       })
@@ -75,6 +78,7 @@ export default function useCategoryRecommendations(category, fallbackRecommendat
         setResult({
           cacheKey,
           recommendations: fallbackList,
+          summary: '',
           error: err,
         });
       });
@@ -88,6 +92,7 @@ export default function useCategoryRecommendations(category, fallbackRecommendat
 
   return {
     recommendations: isCurrentResult ? result.recommendations : fallbackList,
+    summary: isCurrentResult ? result.summary : '',
     isLoading: !isCurrentResult,
     error: isCurrentResult ? result.error : null,
   };
