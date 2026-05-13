@@ -11,7 +11,7 @@ export default function FinalAnswer() {
   const normalizedRequest = String(request).toLowerCase();
   const source = location.state?.source || 'basic-needs';
   const path = location.state?.path || [source];
-  const { getNavigationProps } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(4000);
   const [isRedirectingHome, setIsRedirectingHome] = useState(false);
   const noHoverTimerRef = useRef(null);
 
@@ -58,28 +58,58 @@ export default function FinalAnswer() {
   const message = messageBySource[source] || `You selected: ${normalizedRequest}. Is this correct?`;
 
   // "No" keeps the same hover-delay behavior as other critical actions.
-  const handleNoMouseEnter = () => {
+  const handleNoMouseEnter = (event) => {
+    if (event?.nativeEvent?.isTrusted) {
+      return;
+    }
+
     if (noHoverTimerRef.current || isRedirectingHome) {
       return;
     }
 
+    const target = event?.currentTarget;
+    if (target) {
+      target.classList.add('hover-dwell-active');
+      target.style.setProperty('--dwell-delay', '4000ms');
+    }
+
     noHoverTimerRef.current = setTimeout(() => {
+      if (target) {
+        target.classList.remove('hover-dwell-active');
+        target.style.removeProperty('--dwell-delay');
+      }
       setIsRedirectingHome(true);
       noHoverTimerRef.current = null;
-    }, 3000);
+    }, 4000);
   };
 
-  const handleNoMouseLeave = () => {
+  const handleNoMouseLeave = (event) => {
     if (noHoverTimerRef.current) {
       clearTimeout(noHoverTimerRef.current);
       noHoverTimerRef.current = null;
     }
+
+    const target = event?.currentTarget;
+    if (target) {
+      target.classList.remove('hover-dwell-active');
+      target.style.removeProperty('--dwell-delay');
+    }
   };
 
-  const handleNoActivate = () => {
+  const handleNoActivate = (event) => {
+    if (event?.nativeEvent?.isTrusted) {
+      return;
+    }
+
     if (noHoverTimerRef.current) {
       clearTimeout(noHoverTimerRef.current);
       noHoverTimerRef.current = null;
+    }
+
+    const target = event?.currentTarget;
+    if (target) {
+      target.classList.remove('hover-dwell-active');
+      target.style.removeProperty('--dwell-delay');
     }
     setIsRedirectingHome(true);
   };

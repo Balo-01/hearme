@@ -7,7 +7,7 @@ import { useModal } from '../context/ModalContext';
  * activates the button under the gaze point after a sustained dwell.
  */
 
-const DWELL_DELAY_MS = 3000;
+const DWELL_DELAY_MS = 4000;
 const DEFAULT_HIT_PADDING = 36;
 
 function findInteractiveTarget(el) {
@@ -102,6 +102,7 @@ export default function GazeCursor() {
 
     if (activeTargetRef.current) {
       activeTargetRef.current.classList.remove('gaze-dwell-active');
+      activeTargetRef.current.style.removeProperty('--dwell-delay');
       activeTargetRef.current = null;
     }
   }, []);
@@ -142,13 +143,19 @@ export default function GazeCursor() {
     }
 
     activeTargetRef.current = target;
-    target.classList.add('gaze-dwell-active');
 
+    // Delay 1s before applying hover/mărire effect, then start dwell timer
     dwellTimerRef.current = setTimeout(() => {
-      const targetToActivate = activeTargetRef.current;
-      clearActiveTarget();
-      targetToActivate?.click();
-    }, DWELL_DELAY_MS);
+      if (activeTargetRef.current !== target) return;
+      target.classList.add('gaze-dwell-active');
+      target.style.setProperty('--dwell-delay', `${DWELL_DELAY_MS}ms`);
+
+      dwellTimerRef.current = setTimeout(() => {
+        const targetToActivate = activeTargetRef.current;
+        clearActiveTarget();
+        targetToActivate?.click();
+      }, DWELL_DELAY_MS);
+    }, 1000);
   }, [state, gazePosition, gazeValid, isBlinking, isModalOpen, clearActiveTarget]);
 
   // Hide cursor when blinking or not tracking

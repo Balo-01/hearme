@@ -62,6 +62,7 @@ class PatientRequest(BaseModel):
     id: str
     patient_id: str
     patient_name: Optional[str] = None
+    patient_cnp: Optional[str] = None
     path: List[str]
     status: str
     created_at: datetime
@@ -150,12 +151,34 @@ def _format_patient_name(firstname: Optional[str], lastname: Optional[str]) -> O
     return name or None
 
 
+def _resolve_patient_id(connection: oracledb.Connection, identifier: str) -> str:
+    normalized_identifier = identifier.strip()
+    if not normalized_identifier:
+        raise HTTPException(status_code=400, detail="patient identifier is required")
+
+    cursor = connection.cursor()
+    cursor.execute(
+        """
+        SELECT id
+        FROM patients
+        WHERE id = :identifier OR cnp = :identifier
+        FETCH FIRST 1 ROWS ONLY
+        """,
+        {"identifier": normalized_identifier},
+    )
+    row = cursor.fetchone()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return row[0]
+
+
 def _row_to_request(row: tuple) -> PatientRequest:
     (
         request_id,
         patient_id,
         patient_firstname,
         patient_lastname,
+        patient_cnp,
         path,
         status,
         created_at,
@@ -167,6 +190,7 @@ def _row_to_request(row: tuple) -> PatientRequest:
         id=str(request_id),
         patient_id=patient_id,
         patient_name=_format_patient_name(patient_firstname, patient_lastname),
+        patient_cnp=patient_cnp,
         path=_parse_path(path, request_type, description),
         status=status,
         created_at=_as_utc_datetime(created_at),
@@ -183,6 +207,7 @@ def _select_request_by_id(connection: oracledb.Connection, request_id: int) -> O
             r.patient_id,
             p.firstname,
             p.lastname,
+            p.cnp,
             r.path,
             r.status,
             r.request_date,
@@ -222,8 +247,15 @@ def get_patient_recommendations(
     normalized_category = _normalize_recommendation_category(category)
 
     try:
-        result = get_recommendations(normalized_patient_id, normalized_category)
+        connection = get_connection()
+        try:
+            resolved_patient_id = _resolve_patient_id(connection, normalized_patient_id)
+        finally:
+            connection.close()
+        result = get_recommendations(resolved_patient_id, normalized_category)
         return result
+    except HTTPException:
+        raise
     except ValueError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
@@ -239,6 +271,7 @@ def create_request(data: PatientRequestCreate):
 
     connection = get_connection()
     try:
+        resolved_patient_id = _resolve_patient_id(connection, data.patient_id)
         cursor = connection.cursor()
         request_id = cursor.var(int)
         cursor.execute(
@@ -263,7 +296,7 @@ def create_request(data: PatientRequestCreate):
             RETURNING id INTO :request_id
             """,
             {
-                "patient_id": data.patient_id,
+                "patient_id": resolved_patient_id,
                 "request_date": created_at,
                 "request_type": request_type,
                 "description": description,
@@ -280,6 +313,9 @@ def create_request(data: PatientRequestCreate):
         if created_request is None:
             raise HTTPException(status_code=500, detail="Created request could not be loaded")
         return created_request
+    except HTTPException:
+        connection.rollback()
+        raise
     except oracledb.IntegrityError as exc:
         connection.rollback()
         raise HTTPException(status_code=400, detail="Invalid patient_id") from exc
@@ -291,13 +327,17 @@ def create_request(data: PatientRequestCreate):
 
 
 @app.get("/requests", response_model=List[PatientRequest])
-def get_requests(status: Optional[str] = Query(default="active")):
+def get_requests(
+    status: Optional[str] = Query(default="active"),
+    cnp: Optional[str] = Query(default=None),
+):
     query = """
         SELECT
             r.id,
             r.patient_id,
             p.firstname,
             p.lastname,
+            p.cnp,
             r.path,
             r.status,
             r.request_date,
@@ -308,11 +348,24 @@ def get_requests(status: Optional[str] = Query(default="active")):
         LEFT JOIN patients p ON p.id = r.patient_id
     """
     params = {}
+    conditions = []
 
     normalized_status = status.strip().lower() if status is not None else "active"
-    if normalized_status and normalized_status != "all":
-        query += " WHERE r.status = :status"
+    if normalized_status not in {"active", "done", "all"}:
+        raise HTTPException(status_code=400, detail="Invalid status. Use active, done, or all")
+    if normalized_status != "all":
+        conditions.append("r.status = :status")
         params["status"] = normalized_status
+
+    if cnp is not None:
+        normalized_cnp = cnp.strip()
+        if not normalized_cnp:
+            raise HTTPException(status_code=400, detail="cnp cannot be empty")
+        conditions.append("p.cnp = :cnp")
+        params["cnp"] = normalized_cnp
+
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
 
     query += " ORDER BY r.request_date NULLS LAST, r.id"
 
@@ -339,6 +392,7 @@ def get_patient_requests(patient_id: str, status: Optional[str] = Query(default=
             r.patient_id,
             p.firstname,
             p.lastname,
+            p.cnp,
             r.path,
             r.status,
             r.request_date,
@@ -367,7 +421,6 @@ def get_patient_requests(patient_id: str, status: Optional[str] = Query(default=
         raise HTTPException(status_code=500, detail="Failed to load patient requests") from exc
     finally:
         connection.close()
-
 
 @app.patch("/requests/{request_id}/dismiss", response_model=PatientRequest)
 def dismiss_request(request_id: str):

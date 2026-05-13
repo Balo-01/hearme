@@ -17,7 +17,7 @@ export async function getActiveRequests() {
 
   try {
     // Returns all requests (active + dismissed) for displaying complete history
-    response = await fetch(`${API_BASE_URL}/requests`);
+    response = await fetch(`${API_BASE_URL}/requests?status=all`);
   } catch (error) {
     if (isNetworkError(error)) {
       throw buildApiUnavailableError('load requests');

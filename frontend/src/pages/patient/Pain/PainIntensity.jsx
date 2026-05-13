@@ -6,7 +6,7 @@ export default function PainIntensity() {
   const location = useLocation();
   const area = location.state?.area || 'Unknown area';
   const normalizedArea = String(area).toLowerCase();
-  const { getNavigationProps } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(4000);
 
   return (
     <>
