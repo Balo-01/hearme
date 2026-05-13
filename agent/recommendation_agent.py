@@ -79,7 +79,6 @@ def get_recommendations(patient_id: str, category: str) -> Dict:
 
     client = OpenAI(api_key=api_key)
 
-    # Pre-fetch data in Python — no need for the model to decide which tools to call
     patient_data_sections = []
 
     if category == "pain":

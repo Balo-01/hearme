@@ -1,3 +1,4 @@
+import hashlib
 import pandas as pd
 import oracledb
 import re
@@ -24,7 +25,6 @@ def add_years_safe(date_value, years):
     try:
         return date_value.replace(year=date_value.year + years)
     except ValueError:
-        # Handles Feb 29 when target year is not leap.
         return date_value.replace(month=2, day=28, year=date_value.year + years)
 
 def clean_name(name):
@@ -39,8 +39,8 @@ def generate_contact_number():
     return f"+40 7{random.randint(0, 9)} {random.randint(100, 999)} {random.randint(100, 999)}"
 
 
-def generate_cnp(birthdate, gender):
-    """Generate a Romanian CNP (Personal Numeric Code) based on birthdate and gender."""
+def generate_cnp(birthdate, gender, patient_id):
+    """Generate a deterministic Romanian CNP based on birthdate, gender, and patient_id."""
     year = birthdate.year
     month = birthdate.month
     day = birthdate.day
@@ -53,8 +53,10 @@ def generate_cnp(birthdate, gender):
         s = 3 if gender == 'M' else 4
 
     yy = year % 100
-    county = random.randint(1, 46)
-    sequence = random.randint(1, 999)
+
+    h = int(hashlib.md5(patient_id.encode()).hexdigest(), 16)
+    county = (h % 46) + 1
+    sequence = (h % 999) + 1
 
     base = f"{s}{yy:02d}{month:02d}{day:02d}{county:02d}{sequence:03d}"
 
@@ -64,17 +66,14 @@ def generate_cnp(birthdate, gender):
 
     return base + str(control)
 
-
 def parse_date(date_str):
     """Parse date from various formats."""
     if pd.isna(date_str) or date_str == '':
         return None
     try:
-        # Handle ISO format with time
         if 'T' in str(date_str):
             parsed_date = datetime.fromisoformat(str(date_str).replace('Z', '+00:00')).date()
             return add_years_safe(parsed_date, DATE_YEAR_OFFSET)
-        # Handle date only format
         parsed_date = datetime.strptime(str(date_str), '%Y-%m-%d').date()
         return add_years_safe(parsed_date, DATE_YEAR_OFFSET)
     except (ValueError, TypeError):
@@ -99,7 +98,7 @@ def load_patients(connection):
         lastname = clean_name(row['LAST'])
         gender = row['GENDER'] if row['GENDER'] in ('M', 'F') else None
         contact_number = generate_contact_number()
-        cnp = generate_cnp(birthdate, gender) if gender else None
+        cnp = generate_cnp(birthdate, gender, patient_id) if gender else None
         
         try:
             cursor.execute("""
@@ -162,7 +161,6 @@ def load_medications(connection, valid_patient_ids):
         start_date = parse_date(row['START'])
         stop_date = parse_date(row['STOP'])
         
-        # Both start and stop must exist
         if start_date is None or stop_date is None:
             continue
         
@@ -237,10 +235,8 @@ def main():
     connection = oracledb.connect(**DB_CONFIG)
     
     try:
-        # Load patients first to get valid IDs
         valid_patient_ids = load_patients(connection)
         
-        # Load other tables using valid patient IDs
         load_procedures(connection, valid_patient_ids)
         load_medications(connection, valid_patient_ids)
         load_conditions(connection, valid_patient_ids)
