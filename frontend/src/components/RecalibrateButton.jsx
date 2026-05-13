@@ -5,7 +5,7 @@ import '../pages/calibration/Calibration.css';
 
 /**
  * Persistent recalibration hint shown during tracking.
- * Keyboard shortcut: R key triggers recalibration.
+ * Keyboard shortcut: R returns the user to the setup screen, then recalibrates.
  */
 export default function RecalibrateButton() {
   const { state, recalibrate } = useEyeTracking();
