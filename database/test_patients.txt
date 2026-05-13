@@ -1,4 +1,19 @@
-10339b10-3cd1-4ac3-ac13-ec26728cb592, 1970602100762 - bronsita si sinuzita (bun)
-2ffe9369-24e4-414b-8973-258fad09313a, 2630701106326 - tensiune, diabet, anemie, mana rupta, sinuzita, durere in gat (bun)
-72c0b9ce-7aa4-430b-aaff-bd0ce7846e55, 5220727413461 - otita, luxatie la mana (cam meh)
-b58731cc-2d8b-4c2d-b327-4cab771af3ef, 2750516174918 - sarcina, fractura de mana, cistita, obezitate, molari (bun)
+Pacienti buni de testat:
+
+76982e06-f8b8-4509-9ca3-65a99c8650fe, 2890901183264 (injuri to neck da are si multe atele) - - - > neck pain
+72c0b9ce-7aa4-430b-aaff-bd0ce7846e55, 5220727413461 (otita, luxatie la mana) - - - > a dat mai variat
+1d604da9-9a81-4ba9-80c2-de3375d59b40, 1960525455136 (are sinuzita) - - - > "head pain relief", "sinus pressure alleviation", "nasal congestion treatment"
+034e9e3b-2def-4559-bb2a-7850888ae060, 1901114217894 - - - > a dat mai variat
+f5dcd418-09fe-4a2f-baa0-3da800bd8c3a, 5031018345522 - - - > a dat mai variat
+bfb6537b-535a-4f31-9a56-073220f96a17, 2980703035538 (sinuziat dar si altele) - - - > sinus headache
+
+
+83719bd7-7a41-4c87-93f9-c5de4db6a14a, 2960607145952 - - - > alea basic
+10339b10-3cd1-4ac3-ac13-ec26728cb592, 1970602100762 - - - > alea basic
+2ffe9369-24e4-414b-8973-258fad09313a, 2630701106326 - - - > alea basic
+b58731cc-2d8b-4c2d-b327-4cab771af3ef, 2750516174918 - - - > alea basic
+8d4c4326-e9de-4f45-9a4c-f8c36bff89ae, 2850527145322 - - - > alea basic
+b1e9b0b9-da6e-4f68-b603-bd896a50ca86, 6101213315990 - - - > alea basic
+01207ecd-9dff-4754-8887-4652eda231e2, 6260515425475 - - - > alea basic
+cfee79fc-df05-476e-b274-43e09ea345db, 6230704022660 - - - > alea basic
+ad2e9916-4979-40fc-a8c0-68651a0cb5a6, 5111219086095 - - - > alea basic

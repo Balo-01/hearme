@@ -83,7 +83,7 @@ def get_patient_requests(patient_id, request_type, connection=None):
 
 def main():
     """Example usage."""
-    patient_id = "b58731cc-2d8b-4c2d-b327-4cab771af3ef"
+    patient_id = "1d604da9-9a81-4ba9-80c2-de3375d59b40"
     request_type = "pain"
     result = get_patient_requests(patient_id, request_type)
     print(json.dumps(result, indent=2, ensure_ascii=False))

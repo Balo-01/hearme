@@ -135,7 +135,7 @@ def get_patient_history(patient_id, connection=None):
 
 def main():
     """Example usage."""
-    patient_id = '10339b10-3cd1-4ac3-ac13-ec26728cb592' 
+    patient_id = '1d604da9-9a81-4ba9-80c2-de3375d59b40' 
     medical_history = get_patient_history(patient_id)
     print(json.dumps(medical_history, indent=2, ensure_ascii=False))
 
