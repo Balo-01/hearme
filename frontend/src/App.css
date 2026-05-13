@@ -12,6 +12,25 @@
   );
 }
 
+/* AI summary explaining why recommendations were chosen. */
+.recommendation-summary {
+  position: fixed;
+  bottom: clamp(26px, 5vh, 52px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(520px, 56vw);
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(15, 35, 66, 0.14);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(15, 35, 66, 0.12);
+  padding: 14px 20px;
+  font-size: clamp(0.82rem, 1.4vw, 0.96rem);
+  color: #294a75;
+  text-align: center;
+  line-height: 1.5;
+  z-index: 5;
+}
+
 /* Centered prompt shown above the 4 quadrants. */
 .center-message {
   position: fixed;

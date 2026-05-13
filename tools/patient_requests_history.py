@@ -19,7 +19,7 @@ def _split_datetime(value):
     if value is None:
         return None, None
     if isinstance(value, datetime):
-        return value.date().isoformat(), value.time().isoformat()
+        return value.date().isoformat(), value.time().strftime("%H:%M:%S")
     return None, None
 
 
@@ -56,7 +56,6 @@ def get_patient_requests(patient_id, request_type, connection=None):
         requests = cursor.fetchall()
 
         result = {
-            "patient_id": patient_id,
             "request_type": request_type,
             "requests": []
         }
@@ -71,7 +70,6 @@ def get_patient_requests(patient_id, request_type, connection=None):
                     "date": date_component,
                     "time": time_component,
                     "request": description,
-                    "type": req_type,
                 }
             )
 
@@ -84,7 +82,7 @@ def get_patient_requests(patient_id, request_type, connection=None):
 
 def main():
     """Example usage."""
-    patient_id = "10339b10-3cd1-4ac3-ac13-ec26728cb592"
+    patient_id = "1d604da9-9a81-4ba9-80c2-de3375d59b40"
     request_type = "pain"
     result = get_patient_requests(patient_id, request_type)
     print(json.dumps(result, indent=2, ensure_ascii=False))

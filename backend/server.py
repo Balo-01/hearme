@@ -72,6 +72,7 @@ class RecommendationResponse(BaseModel):
     patient_id: str
     category: str
     recommendations: List[str]
+    summary: str = ""
 
 
 def _normalize_request_type(value: str) -> str:

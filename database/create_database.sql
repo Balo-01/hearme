@@ -19,18 +19,6 @@ CREATE TABLE procedures (
     CONSTRAINT fk_procedures_patient FOREIGN KEY (patient) REFERENCES patients(id)
 );
 
--- Create observations table
-CREATE TABLE observations (
-    id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    observation_date DATE,
-    patient VARCHAR2(50) NOT NULL,
-    description VARCHAR2(500),
-    value VARCHAR2(100),
-    units VARCHAR2(50),
-    type VARCHAR2(20) CHECK (type IN ('text', 'numeric')),
-    CONSTRAINT fk_observations_patient FOREIGN KEY (patient) REFERENCES patients(id)
-);
-
 -- Create medications table
 CREATE TABLE medications (
     id NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -75,14 +63,12 @@ CREATE TABLE requests (
 
 -- select * from patients;
 -- select * from procedures;
--- select * from observations;
 -- select * from medications;
 -- select * from conditions;
 -- select * from allergies;
 -- select * from requests;
 
 -- DELETE FROM procedures;
--- DELETE FROM observations;
 -- DELETE FROM medications;
 -- DELETE FROM conditions;
 -- DELETE FROM allergies;

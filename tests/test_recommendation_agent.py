@@ -13,11 +13,11 @@ from agent.recommendation_agent import get_recommendations
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Test script: Generate 3 patient recommendations using GPT-4o-mini")
-    parser.add_argument("patient_id", nargs="?", default="10339b10-3cd1-4ac3-ac13-ec26728cb592", help="Patient ID (UUID)")
+    parser.add_argument("patient_id", nargs="?", default="1d604da9-9a81-4ba9-80c2-de3375d59b40", help="Patient ID (UUID)")
     parser.add_argument(
         "category",
         nargs="?",
-        default="communication",
+        default="pain",
         choices=["pain", "basic_needs", "communication"],
         help="Category: pain, basic_needs, or communication",
     )

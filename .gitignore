@@ -23,6 +23,7 @@ create-user.sql
 questions.txt
 database/config.txt
 database/test_id.txt
+database/test.sql
 
 # Python build artifacts
 build/

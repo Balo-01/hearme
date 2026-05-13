@@ -3,7 +3,7 @@ import os
 import sys
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -58,83 +58,19 @@ def summarize_requests(request_history: Dict, recent_limit: int = 5, frequent_li
     }
 
 
-def process_tool_call(tool_name: str, tool_input: Dict[str, Any]) -> str:
-    """Process a tool call and return the result as a JSON string."""
-    if tool_name == "get_patient_medical_history":
-        patient_id = tool_input.get("patient_id")
-        result = get_patient_history(patient_id)
-        return json.dumps(result)
-    elif tool_name == "get_patient_requests_history":
-        patient_id = tool_input.get("patient_id")
-        request_type = tool_input.get("request_type")
-        result = get_patient_requests(patient_id, request_type)
-        summary = summarize_requests(result)
-        return json.dumps({
-            "patient_id": patient_id,
-            "request_type": request_type,
-            "summary": summary
-        })
-    else:
-        return json.dumps({"error": f"Unknown tool: {tool_name}"})
-
-
-def get_tool_definitions():
-    """Return the tool definitions for OpenAI."""
-    return [
-        {
-            "type": "function",
-            "function": {
-                "name": "get_patient_medical_history",
-                "description": "Retrieve the complete medical history for a patient including date of birth, gender, conditions, procedures, observations, medications, and allergies.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "patient_id": {
-                            "type": "string",
-                            "description": "The unique identifier (UUID) of the patient"
-                        }
-                    },
-                    "required": ["patient_id"]
-                }
-            }
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_patient_requests_history",
-                "description": "Retrieve the request history for a patient filtered by request type (pain, basic_needs, or communication).",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "patient_id": {
-                            "type": "string",
-                            "description": "The unique identifier (UUID) of the patient"
-                        },
-                        "request_type": {
-                            "type": "string",
-                            "enum": ["pain", "basic_needs", "communication"],
-                            "description": "The type of requests to retrieve"
-                        }
-                    },
-                    "required": ["patient_id", "request_type"]
-                }
-            }
-        }
-    ]
-
-
-def extract_recommendations(response_text: str) -> List[str]:
+def extract_recommendations_and_summary(response_text: str):
     try:
         parsed = json.loads(response_text)
         recommendations = parsed.get("recommendations", [])
+        summary = parsed.get("summary", "")
         if isinstance(recommendations, list):
             cleaned = [str(item).strip() for item in recommendations if str(item).strip()]
-            return cleaned[:3]
+            return cleaned[:3], str(summary).strip()
     except json.JSONDecodeError:
         pass
 
     lines = [line.strip("-• \t") for line in response_text.splitlines() if line.strip()]
-    return lines[:3]
+    return lines[:3], ""
 
 
 def get_recommendations(patient_id: str, category: str) -> Dict:
@@ -143,35 +79,41 @@ def get_recommendations(patient_id: str, category: str) -> Dict:
         raise ValueError("OPENAI_API_KEY is missing. Add it to .env in project root")
 
     client = OpenAI(api_key=api_key)
-    tools = get_tool_definitions()
+
+    patient_data_sections = []
+
+    if category == "pain":
+        medical_history = get_patient_history(patient_id)
+        patient_data_sections.append(f"Medical history:\n{json.dumps(medical_history, indent=2)}")
+
+    requests_history = get_patient_requests(patient_id, category)
+    summary = summarize_requests(requests_history)
+    patient_data_sections.append(f"Past {category} requests summary:\n{json.dumps(summary, indent=2)}")
+
+    patient_data = "\n\n".join(patient_data_sections)
 
     options = CATEGORY_OPTIONS.get(category, [])
     options_text = ", ".join(f'"{o}"' for o in options)
-    
+
     system_prompt = (
-        "You are a clinical support assistant. You are helping a patient ask for what he needs. "
-        "Use the available tools to fetch the patient data you need, then provide exactly 3 request recommendations for what the patient may need. "
-        "For category 'pain', fetch both medical history and request history. Medical history is more important than requests history for pain-related recommendations. "
-        "For categories 'basic_needs' and 'communication', fetch request history only. "
-        "After fetching data, return ONLY valid JSON with this exact shape: "
-        "{\"recommendations\": [\"rec1\", \"rec2\", \"rec3\"]}. "
-        "Keep the recommendations 2-3 words long. "
-        "Do not give general stuff like 'ask nurse for help' or 'use call button' or 'ask for medication'. "
-        f"For the '{category}' category, the only valid recommendation values are: [{options_text}]. "
-        "Pick the 3 most relevant ones based on the patient's data. You can also come up with similar recommendations that are not in the list but still very specific. "
-        "Focus on specific things the patient can request based on their history, like 'head pain' or 'breathing difficulty' for pain category, "
-        "'water' or 'bathroom' for basic needs, 'talk to family' or 'talk to nurse' for communication. "
-        "Keep basic_needs recommendations distinct from communication recommendations and different from pain-related recommendations. "
-        "Don't give recommendations about pain if the category is basic_needs or communication. "
-        "Don't give recommendations about basic needs if the category is pain or communication. "
-        "Don't give recommendations about communication if the category is pain or basic_needs. "
+        "You are a clinical support assistant helping a patient communicate their needs. "
+        "Based on the patient data provided, return exactly 3 recommendations for what the patient may need, "
+        "and a brief summary explaining why those 3 options were chosen based on the patient history. "
+        "Return ONLY valid JSON with this exact shape: "
+        "{\"recommendations\": [\"rec1\", \"rec2\", \"rec3\"], \"summary\": \"explanation\"}. "
+        "Keep each recommendation 2-3 words long. "
+        "The summary should be 2-4 sentences explaining what in the patient history led to each recommendation. "
+        "Do not suggest generic actions like 'ask nurse for help' or 'use call button' or 'ask for medication'."
+        f"Only recommend items relevant to the '{category}' category. "
+        f"Preferred options for this category are: [{options_text}]. "
+        "Pick the 3 most relevant ones based on the patient data. You may suggest similar specific alternatives not in the list. "
         "Do not output extra keys or commentary."
     )
 
     user_message = (
-        f"Patient ID: {patient_id}\n"
         f"Category: {category}\n\n"
-        "Fetch the necessary patient data and provide exactly 3 actionable recommendations."
+        f"{patient_data}\n\n"
+        "Provide exactly 3 recommendations."
     )
 
     messages = [
@@ -179,32 +121,14 @@ def get_recommendations(patient_id: str, category: str) -> Dict:
         {"role": "user", "content": user_message},
     ]
 
-    while True:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            max_tokens=512,
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-        )
-
-        if response.choices[0].finish_reason == "tool_calls":
-            messages.append(response.choices[0].message)
-
-            for tool_call in response.choices[0].message.tool_calls:
-                tool_name = tool_call.function.name
-                tool_input = json.loads(tool_call.function.arguments)
-                tool_result = process_tool_call(tool_name, tool_input)
-                messages.append({
-                    "tool_call_id": tool_call.id,
-                    "role": "tool",
-                    "content": tool_result,
-                })
-        else:
-            break
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        max_tokens=512,
+        messages=messages,
+    )
 
     response_text = response.choices[0].message.content.strip()
-    recommendations = extract_recommendations(response_text)
+    recommendations, summary = extract_recommendations_and_summary(response_text)
 
     if len(recommendations) < 3:
         raise ValueError(
@@ -216,4 +140,5 @@ def get_recommendations(patient_id: str, category: str) -> Dict:
         "patient_id": patient_id,
         "category": category,
         "recommendations": recommendations[:3],
+        "summary": summary,
     }
