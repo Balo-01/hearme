@@ -31,6 +31,7 @@ const GAZE_CAMERA_ROUTES = new Set([
   '/patient/pain/intensity',
   '/patient/final-answer',
 ]);
+const HIDE_GAZE_CAMERA_PREVIEW_EVENT = 'hearme:hide-gaze-camera-preview';
 
 function App() {
   const { state, cameraPreview, checkFace } = useEyeTracking();
@@ -104,6 +105,15 @@ function App() {
 
     return () => clearInterval(intervalId);
   }, [showCameraPreview, isGazePage, isModalOpen, checkFace]);
+
+  useEffect(() => {
+    const handleHideCameraPreview = () => {
+      setShowCameraPreview(false);
+    };
+
+    window.addEventListener(HIDE_GAZE_CAMERA_PREVIEW_EVENT, handleHideCameraPreview);
+    return () => window.removeEventListener(HIDE_GAZE_CAMERA_PREVIEW_EVENT, handleHideCameraPreview);
+  }, []);
 
   return (
     <>

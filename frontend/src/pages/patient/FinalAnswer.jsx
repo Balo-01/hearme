@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import '../../App.css';
 import useHoverNavigate from '../../hooks/useHoverNavigate';
 
+const HIDE_GAZE_CAMERA_PREVIEW_EVENT = 'hearme:hide-gaze-camera-preview';
+
 export default function FinalAnswer() {
   // State passed from previous page carries source category + selected request.
   const location = useLocation();
@@ -78,6 +80,7 @@ export default function FinalAnswer() {
         target.classList.remove('hover-dwell-active');
         target.style.removeProperty('--dwell-delay');
       }
+      window.dispatchEvent(new Event(HIDE_GAZE_CAMERA_PREVIEW_EVENT));
       setIsRedirectingHome(true);
       noHoverTimerRef.current = null;
     }, 4000);
@@ -111,6 +114,7 @@ export default function FinalAnswer() {
       target.classList.remove('hover-dwell-active');
       target.style.removeProperty('--dwell-delay');
     }
+    window.dispatchEvent(new Event(HIDE_GAZE_CAMERA_PREVIEW_EVENT));
     setIsRedirectingHome(true);
   };
 
