@@ -60,3 +60,10 @@ desktop.ini
 *.avi
 *.mov
 *.mkv
+
+
+.tmp/
+**/.tmp/
+**/.pip-cache/
+**/.npm-cache/
+node_modules/

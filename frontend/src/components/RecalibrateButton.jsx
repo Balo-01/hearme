@@ -3,7 +3,7 @@ import { useEyeTracking, TrackingState } from '../context/EyeTrackingContext';
 import '../pages/calibration/Calibration.css';
 
 /**
- * Persistent recalibrate button shown during tracking.
+ * Persistent recalibration hint shown during tracking.
  * Keyboard shortcut: R key triggers recalibration.
  */
 export default function RecalibrateButton() {
@@ -13,7 +13,6 @@ export default function RecalibrateButton() {
     recalibrate();
   }, [recalibrate]);
 
-  // Keyboard shortcut: R to recalibrate
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (state !== TrackingState.TRACKING) return;
@@ -28,17 +27,5 @@ export default function RecalibrateButton() {
 
   if (state !== TrackingState.TRACKING) return null;
 
-  return (
-    <>
-      <button
-        className="recalibrate-btn"
-        onClick={handleRecalibrate}
-        aria-label="Recalibrate eye tracking"
-        tabIndex={0}
-      >
-        ↺ Recalibrate
-      </button>
-      <span className="recalibrate-hint">Press R</span>
-    </>
-  );
+  return <span className="recalibrate-hint">Press R for recalibrate</span>;
 }
