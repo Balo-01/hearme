@@ -61,6 +61,7 @@ const mapBackendRequest = (backendReq, source, requestText) => {
     rawRequest: String(rawRequest).toLowerCase(),
     aiRephrasedRequest: buildAiRephrasedRequest(rawRequest, category),
     patientHistory: buildPatientHistory(),
+    ai_summary: backendReq.ai_summary || null,
   };
 };
 
@@ -68,7 +69,7 @@ const POLLING_INTERVAL_MS = 5000;
 
 export function RequestsProvider({ children }) {
   const [requests, setRequests] = useState([]);
-  const { patientId } = usePatient();
+  const { patientId, aiSummary } = usePatient();
 
   // Fetches active requests from the backend on mount, then refreshes every POLLING_INTERVAL_MS.
   // This ensures the nurse dashboard reflects new patient requests without manual refresh.
@@ -100,7 +101,8 @@ export function RequestsProvider({ children }) {
         const effectivePatientId = overriddenPatientId || patientId || DEFAULT_PATIENT_ID;
         const backendRequest = await createRequest(
           effectivePatientId,
-          path || [source]
+          path || [source],
+          aiSummary,
         );
         const newRequest = mapBackendRequest(backendRequest, source, request);
         setRequests((prev) => [newRequest, ...prev]);
@@ -112,7 +114,7 @@ export function RequestsProvider({ children }) {
         setRequests((prev) => prev.filter((req) => req.id !== requestId));
       },
     }),
-    [requests, patientId]
+    [requests, patientId, aiSummary]
   );
 
   return <RequestsContext.Provider value={value}>{children}</RequestsContext.Provider>;

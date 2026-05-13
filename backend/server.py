@@ -45,6 +45,7 @@ app.add_middleware(
 class PatientRequestCreate(BaseModel):
     patient_id: str
     path: List[str]
+    ai_summary: Optional[str] = None
 
     @field_validator("path")
     def validate_path(cls, value):
@@ -67,6 +68,7 @@ class PatientRequest(BaseModel):
     status: str
     created_at: datetime
     dismissed_at: Optional[datetime] = None
+    ai_summary: Optional[str] = None
 
 
 class RecommendationResponse(BaseModel):
@@ -185,6 +187,7 @@ def _row_to_request(row: tuple) -> PatientRequest:
         dismissed_at,
         request_type,
         description,
+        ai_summary,
     ) = row
     return PatientRequest(
         id=str(request_id),
@@ -195,6 +198,7 @@ def _row_to_request(row: tuple) -> PatientRequest:
         status=status,
         created_at=_as_utc_datetime(created_at),
         dismissed_at=_as_utc_datetime(dismissed_at),
+        ai_summary=_read_lob(ai_summary) if ai_summary else None,
     )
 
 
@@ -213,7 +217,8 @@ def _select_request_by_id(connection: oracledb.Connection, request_id: int) -> O
             r.request_date,
             r.dismissed_at,
             r.request_type,
-            r.description
+            r.description,
+            r.ai_summary
         FROM requests r
         LEFT JOIN patients p ON p.id = r.patient_id
         WHERE r.id = :request_id
@@ -272,6 +277,8 @@ def create_request(data: PatientRequestCreate):
     connection = get_connection()
     try:
         resolved_patient_id = _resolve_patient_id(connection, data.patient_id)
+        ai_summary = data.ai_summary or None
+
         cursor = connection.cursor()
         request_id = cursor.var(int)
         cursor.execute(
@@ -283,7 +290,8 @@ def create_request(data: PatientRequestCreate):
                 description,
                 path,
                 status,
-                dismissed_at
+                dismissed_at,
+                ai_summary
             ) VALUES (
                 :patient_id,
                 :request_date,
@@ -291,7 +299,8 @@ def create_request(data: PatientRequestCreate):
                 :description,
                 :path,
                 :status,
-                :dismissed_at
+                :dismissed_at,
+                :ai_summary
             )
             RETURNING id INTO :request_id
             """,
@@ -303,6 +312,7 @@ def create_request(data: PatientRequestCreate):
                 "path": path_json,
                 "status": "active",
                 "dismissed_at": None,
+                "ai_summary": ai_summary,
                 "request_id": request_id,
             },
         )
@@ -343,7 +353,8 @@ def get_requests(
             r.request_date,
             r.dismissed_at,
             r.request_type,
-            r.description
+            r.description,
+            r.ai_summary
         FROM requests r
         LEFT JOIN patients p ON p.id = r.patient_id
     """

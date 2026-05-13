@@ -32,7 +32,7 @@ export async function getActiveRequests() {
   return response.json();
 }
 
-export async function createRequest(patientId, path) {
+export async function createRequest(patientId, path, aiSummary) {
   let response;
 
   try {
@@ -42,6 +42,7 @@ export async function createRequest(patientId, path) {
       body: JSON.stringify({
         patient_id: patientId,
         path: Array.isArray(path) ? path : [path],
+        ai_summary: aiSummary || null,
       }),
     });
   } catch (error) {

@@ -58,6 +58,7 @@ CREATE TABLE requests (
     path CLOB,
     status VARCHAR2(20) DEFAULT 'active' NOT NULL,
     dismissed_at TIMESTAMP,
+    ai_summary CLOB,
     CONSTRAINT fk_requests_patient FOREIGN KEY (patient_id) REFERENCES patients(id)
 );
 
