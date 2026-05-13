@@ -38,7 +38,7 @@ except ImportError:
 from eyetrax.gaze import GazeEstimator
 from eyetrax.calibration.common import compute_grid_points
 from eyetrax.filters import KalmanEMASmoother, KalmanSmoother, NoSmoother, make_kalman
-from eyetrax.utils.video import open_camera
+from eyetrax.utils.video import list_available_cameras, open_camera_with_index
 
 
 class GazeServer:
@@ -72,6 +72,7 @@ class GazeServer:
         # Calibration state
         self._calibrating = False
         self._last_gaze_position = None
+        self.available_camera_indices = []
 
     def _make_smoother(self):
         if self.filter_method == "kalman":
@@ -82,11 +83,8 @@ class GazeServer:
 
     async def start(self):
         """Start the WebSocket server."""
-        self.cap = open_camera(self.camera_index)
-        if not self.cap.isOpened():
-            raise RuntimeError(f"Cannot open camera {self.camera_index}")
-
-        print(f"[gaze-server] Camera opened (index {self.camera_index})")
+        self._refresh_available_cameras()
+        self._open_camera(self.camera_index, allow_fallback=True)
         print(f"[gaze-server] Starting WebSocket server on ws://{self.host}:{self.port}")
 
         async with websockets.serve(
@@ -99,17 +97,51 @@ class GazeServer:
             self.running = True
             await asyncio.Future()  # Run forever
 
+    def _refresh_available_cameras(self):
+        cameras = list_available_cameras()
+        self.available_camera_indices = cameras or [self.camera_index]
+
+    def _connection_payload(self):
+        return {
+            "type": "connection",
+            "status": "ready",
+            "calibrated": self.calibrated,
+            "camera_index": self.camera_index,
+            "available_cameras": self.available_camera_indices,
+        }
+
+    def _reset_tracking_state(self):
+        self.calibrated = False
+        self.gaze_estimator.reset_movement_center()
+        self.smoother = None
+        self._last_gaze_position = None
+
+    def _open_camera(self, camera_index: int, *, allow_fallback: bool):
+        previous_cap = self.cap
+        cap, actual_index = open_camera_with_index(
+            camera_index,
+            allow_fallback=allow_fallback,
+        )
+        self.cap = cap
+        self.camera_index = actual_index
+        if previous_cap and previous_cap.isOpened():
+            previous_cap.release()
+        print(f"[gaze-server] Camera opened (index {self.camera_index})")
+
+    async def _send_connection_state(self, websocket):
+        await websocket.send(json.dumps(self._connection_payload()))
+
+    async def _broadcast_connection_state(self):
+        await self._broadcast(self._connection_payload())
+
     async def _handle_client(self, websocket):
         """Handle a new client connection."""
         self.clients.add(websocket)
         print(f"[gaze-server] Client connected ({len(self.clients)} total)")
 
         try:
-            await websocket.send(json.dumps({
-                "type": "connection",
-                "status": "ready",
-                "calibrated": self.calibrated,
-            }))
+            self._refresh_available_cameras()
+            await self._send_connection_state(websocket)
 
             # Start gaze loop if calibrated
             if self.calibrated:
@@ -147,10 +179,7 @@ class GazeServer:
             await self._run_calibration(websocket, method)
 
         elif msg_type == "recalibrate":
-            self.calibrated = False
-            self.gaze_estimator.reset_movement_center()
-            self.smoother = None
-            self._last_gaze_position = None
+            self._reset_tracking_state()
             method = msg.get("method", "9p")
             await self._run_calibration(websocket, method)
 
@@ -158,19 +187,16 @@ class GazeServer:
             # Drop calibration and stop streaming, but don't auto-start a new one.
             # The frontend will return to the pre-calibration screen and the user
             # presses Start to begin a fresh calibration.
-            self.calibrated = False
-            self.gaze_estimator.reset_movement_center()
-            self.smoother = None
-            self._last_gaze_position = None
+            self._reset_tracking_state()
             print("[gaze-server] Calibration reset, awaiting new calibration")
-            await websocket.send(json.dumps({
-                "type": "connection",
-                "status": "ready",
-                "calibrated": False,
-            }))
+            self._refresh_available_cameras()
+            await self._send_connection_state(websocket)
 
         elif msg_type == "check_face":
             await self._check_face(websocket)
+
+        elif msg_type == "set_camera":
+            await self._set_camera(websocket, msg.get("camera_index"))
 
         else:
             await websocket.send(json.dumps({
@@ -346,6 +372,51 @@ class GazeServer:
             "metrics": setup["metrics"],
             "preview": self._encode_preview(frame),
         }))
+
+    async def _set_camera(self, websocket, requested_camera_index):
+        """Switch the active camera while on the setup screen."""
+        if self._calibrating:
+            await websocket.send(json.dumps({
+                "type": "error",
+                "message": "Cannot switch cameras during calibration",
+            }))
+            return
+
+        try:
+            requested_camera_index = int(requested_camera_index)
+        except (TypeError, ValueError):
+            await websocket.send(json.dumps({
+                "type": "error",
+                "message": "Invalid camera index",
+            }))
+            return
+
+        self._refresh_available_cameras()
+        if requested_camera_index not in self.available_camera_indices:
+            await websocket.send(json.dumps({
+                "type": "error",
+                "message": f"Camera {requested_camera_index} is not available",
+            }))
+            await self._send_connection_state(websocket)
+            return
+
+        if requested_camera_index == self.camera_index and self.cap and self.cap.isOpened():
+            await self._send_connection_state(websocket)
+            return
+
+        try:
+            self._open_camera(requested_camera_index, allow_fallback=False)
+        except RuntimeError as exc:
+            await websocket.send(json.dumps({
+                "type": "error",
+                "message": str(exc),
+            }))
+            return
+
+        self._reset_tracking_state()
+        self._refresh_available_cameras()
+        print(f"[gaze-server] Switched to camera {self.camera_index}")
+        await self._broadcast_connection_state()
 
     async def _run_calibration(self, websocket, method: str = "9p"):
         """Run calibration flow, sending point data to the frontend."""

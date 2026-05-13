@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useEyeTracking, TrackingState } from '../context/EyeTrackingContext';
 import '../pages/calibration/Calibration.css';
 
@@ -8,10 +9,12 @@ import '../pages/calibration/Calibration.css';
  */
 export default function RecalibrateButton() {
   const { state, recalibrate } = useEyeTracking();
+  const navigate = useNavigate();
 
   const handleRecalibrate = useCallback(() => {
+    navigate('/patient');
     recalibrate();
-  }, [recalibrate]);
+  }, [navigate, recalibrate]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
