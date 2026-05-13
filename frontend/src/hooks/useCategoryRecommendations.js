@@ -38,7 +38,7 @@ function loadRecommendations(patientId, category) {
 }
 
 export default function useCategoryRecommendations(category, fallbackRecommendations) {
-  const { patientId } = usePatient();
+  const { patientId, setAiSummary } = usePatient();
   const effectivePatientId = patientId || DEFAULT_PATIENT_ID;
   const normalizedCategory = normalizeCategory(category);
   const cacheKey = `${effectivePatientId}:${normalizedCategory}`;
@@ -68,6 +68,7 @@ export default function useCategoryRecommendations(category, fallbackRecommendat
           summary,
           error: null,
         });
+        setAiSummary(summary);
       })
       .catch((err) => {
         if (isCancelled) {
