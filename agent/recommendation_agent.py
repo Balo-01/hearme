@@ -58,18 +58,19 @@ def summarize_requests(request_history: Dict, recent_limit: int = 5, frequent_li
     }
 
 
-def extract_recommendations(response_text: str) -> List[str]:
+def extract_recommendations_and_summary(response_text: str):
     try:
         parsed = json.loads(response_text)
         recommendations = parsed.get("recommendations", [])
+        summary = parsed.get("summary", "")
         if isinstance(recommendations, list):
             cleaned = [str(item).strip() for item in recommendations if str(item).strip()]
-            return cleaned[:3]
+            return cleaned[:3], str(summary).strip()
     except json.JSONDecodeError:
         pass
 
     lines = [line.strip("-• \t") for line in response_text.splitlines() if line.strip()]
-    return lines[:3]
+    return lines[:3], ""
 
 
 def get_recommendations(patient_id: str, category: str) -> Dict:
@@ -96,10 +97,12 @@ def get_recommendations(patient_id: str, category: str) -> Dict:
 
     system_prompt = (
         "You are a clinical support assistant helping a patient communicate their needs. "
-        "Based on the patient data provided, return exactly 3 recommendations for what the patient may need. "
+        "Based on the patient data provided, return exactly 3 recommendations for what the patient may need, "
+        "and a brief summary explaining why those 3 options were chosen based on the patient history. "
         "Return ONLY valid JSON with this exact shape: "
-        "{\"recommendations\": [\"rec1\", \"rec2\", \"rec3\"]}. "
+        "{\"recommendations\": [\"rec1\", \"rec2\", \"rec3\"], \"summary\": \"explanation\"}. "
         "Keep each recommendation 2-3 words long. "
+        "The summary should be 2-4 sentences explaining what in the patient history led to each recommendation. "
         "Do not suggest generic actions like 'ask nurse for help' or 'use call button' or 'ask for medication'."
         f"Only recommend items relevant to the '{category}' category. "
         f"Preferred options for this category are: [{options_text}]. "
@@ -120,12 +123,12 @@ def get_recommendations(patient_id: str, category: str) -> Dict:
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
-        max_tokens=256,
+        max_tokens=512,
         messages=messages,
     )
 
     response_text = response.choices[0].message.content.strip()
-    recommendations = extract_recommendations(response_text)
+    recommendations, summary = extract_recommendations_and_summary(response_text)
 
     if len(recommendations) < 3:
         raise ValueError(
@@ -137,4 +140,5 @@ def get_recommendations(patient_id: str, category: str) -> Dict:
         "patient_id": patient_id,
         "category": category,
         "recommendations": recommendations[:3],
+        "summary": summary,
     }

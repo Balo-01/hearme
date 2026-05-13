@@ -45,7 +45,6 @@ def get_patient_history(patient_id, connection=None):
         patient_row = cursor.fetchone()
 
         medical_history = {
-            "patient_id": patient_id,
             "date_of_birth": _to_iso_date(patient_row[0]) if patient_row else None,
             "gender": patient_row[1] if patient_row else None,
             "conditions": [],

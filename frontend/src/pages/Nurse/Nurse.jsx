@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import '../../App.css';
 import { useRequests } from '../../context/RequestsContext.jsx';
+import { getRecommendations } from '../../services/requestsApi';
 
 export default function Nurse() {
   const { requests, dismissRequest } = useRequests();
@@ -26,6 +27,30 @@ export default function Nurse() {
   const handleResolveRequest = (resolvedRequestId) => {
     dismissRequest(resolvedRequestId);
   };
+
+  const [aiSummary, setAiSummary] = useState('');
+
+  useEffect(() => {
+    if (!selectedRequest) {
+      setAiSummary('');
+      return;
+    }
+
+    let cancelled = false;
+    setAiSummary('');
+
+    getRecommendations(selectedRequest.patient_id, selectedRequest.category)
+      .then((data) => {
+        if (!cancelled && typeof data?.summary === 'string') {
+          setAiSummary(data.summary);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setAiSummary('');
+      });
+
+    return () => { cancelled = true; };
+  }, [selectedRequest?.id]);
 
   return (
     <div className="nurse-page">
@@ -94,11 +119,9 @@ export default function Nurse() {
               </div>
               <div className="nurse-detail-card">
                 <h3>Patient history (AI context)</h3>
-                <ul className="nurse-history-list">
-                  {(selectedRequest.patientHistory || []).map((historyItem) => (
-                    <li key={historyItem}>{historyItem}</li>
-                  ))}
-                </ul>
+                <div className="nurse-ai-box">
+                  {aiSummary || 'Loading AI context...'}
+                </div>
               </div>
             </>
           ) : (
