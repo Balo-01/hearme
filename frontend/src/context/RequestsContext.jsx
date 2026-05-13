@@ -9,11 +9,17 @@ import { usePatient } from './PatientContext';
 
 const RequestsContext = createContext(null);
 
+const getIndefiniteArticle = (word) => {
+  const normalized = String(word || '').trim().toLowerCase();
+  return /^[aeiou]/.test(normalized) ? 'an' : 'a';
+};
+
 // Builds the AI-rephrased version of a patient request shown on the nurse dashboard.
 // Uses the request category (source) and the original request text.
 const buildAiRephrasedRequest = (requestText, source) => {
   const normalizedSource = String(source || 'general').toLowerCase();
-  return `The patient submitted a ${normalizedSource} request: ${requestText}. Please review and provide the appropriate support.`;
+  const article = getIndefiniteArticle(normalizedSource);
+  return `The patient submitted ${article} ${normalizedSource} request: ${requestText}. Please review and provide the appropriate support.`;
 };
 
 // Placeholder for patient history until AI integration is implemented.

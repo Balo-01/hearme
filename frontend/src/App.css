@@ -227,18 +227,6 @@
 }
 
 /* Progressive highlight during sustained hover (used by eye-tracking flow). */
-.quadrant-btn:hover,
-.quadrant-btn:focus {
-  transition: transform var(--dwell-delay, 4000ms) linear,
-    box-shadow var(--dwell-delay, 4000ms) linear,
-    filter var(--dwell-delay, 4000ms) linear;
-  transform: translateY(-6px) scale(1.14);
-  box-shadow: 0 28px 50px rgba(15, 35, 66, 0.34);
-  filter: saturate(1.16) brightness(1.06);
-  z-index: 20;
-  outline: none;
-}
-
 .quadrant-btn.hover-dwell-active,
 .quadrant-btn.gaze-dwell-active {
   transition: transform var(--dwell-delay, 4000ms) linear,
@@ -255,14 +243,6 @@
 .quadrant-btn.gaze-dwell-active::before {
   opacity: 1;
   animation: dwell-fill var(--dwell-delay, 4000ms) linear forwards;
-}
-
-.quadrant-btn:disabled:hover,
-.quadrant-btn:disabled:focus {
-  transform: scale(1);
-  box-shadow: 0 14px 30px rgba(15, 35, 66, 0.16);
-  filter: none;
-  z-index: auto;
 }
 
 @keyframes dwell-fill {

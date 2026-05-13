@@ -196,7 +196,7 @@ export default function Nurse() {
                 </p>
               </div>
               <div className="nurse-detail-card">
-                <h3>AI reformulated request</h3>
+                <h3>Detailed request</h3>
                 <div className="nurse-ai-box">
                   {selectedRequest.aiRephrasedRequest || "No AI response yet"}
                 </div>
