@@ -16,7 +16,7 @@ DB_CONFIG = {
 
 CSV_PATH = os.getenv('CSV_PATH', 'csv/')
 MAX_NUMBER_OF_PATIENTS = 15
-DATE_YEAR_OFFSET = 5
+DATE_YEAR_OFFSET = 7
 
 
 def add_years_safe(date_value, years):
@@ -151,37 +151,6 @@ def load_procedures(connection, valid_patient_ids):
     print(f"  Inserted {count} procedures")
 
 
-def load_observations(connection, valid_patient_ids):
-    """Load observations from CSV to database."""
-    df = pd.read_csv(f'{CSV_PATH}observations.csv')
-    
-    cursor = connection.cursor()
-    count = 0
-    
-    for _, row in df.iterrows():
-        observation_date = parse_date(row['DATE'])
-        if observation_date is None:
-            continue
-        
-        patient_id = row['PATIENT']
-        if patient_id not in valid_patient_ids:
-            continue
-        
-        description = str(row['DESCRIPTION'])[:500] if pd.notna(row['DESCRIPTION']) else None
-        value = str(row['VALUE'])[:100] if pd.notna(row['VALUE']) else None
-        units = str(row['UNITS'])[:50] if pd.notna(row['UNITS']) else None
-        obs_type = str(row['TYPE'])[:20] if pd.notna(row['TYPE']) else None
-        
-        cursor.execute("""
-            INSERT INTO observations (observation_date, patient, description, value, units, type)
-            VALUES (:1, :2, :3, :4, :5, :6)
-        """, [observation_date, patient_id, description, value, units, obs_type])
-        count += 1
-    
-    connection.commit()
-    print(f"  Inserted {count} observations")
-
-
 def load_medications(connection, valid_patient_ids):
     """Load medications from CSV to database."""
     df = pd.read_csv(f'{CSV_PATH}medications.csv')
@@ -273,7 +242,6 @@ def main():
         
         # Load other tables using valid patient IDs
         load_procedures(connection, valid_patient_ids)
-        load_observations(connection, valid_patient_ids)
         load_medications(connection, valid_patient_ids)
         load_conditions(connection, valid_patient_ids)
         load_allergies(connection, valid_patient_ids)
