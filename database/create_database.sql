@@ -5,7 +5,8 @@ CREATE TABLE patients (
     firstname VARCHAR2(100),
     lastname VARCHAR2(100),
     gender CHAR(1) CHECK (gender IN ('M', 'F')),
-    contact_number VARCHAR2(20)
+    contact_number VARCHAR2(20),
+    cnp VARCHAR2(13)
 );
 
 -- Create procedures table
@@ -88,3 +89,11 @@ CREATE TABLE requests (
 -- DELETE FROM requests;
 -- DELETE FROM patients;
 -- COMMIT;
+
+-- DROP TABLE procedures;
+-- DROP TABLE observations;
+-- DROP TABLE medications;
+-- DROP TABLE conditions;
+-- DROP TABLE allergies;
+-- DROP TABLE requests;
+-- DROP TABLE patients;
