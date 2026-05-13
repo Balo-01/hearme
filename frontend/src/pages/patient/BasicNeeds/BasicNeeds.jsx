@@ -32,7 +32,8 @@ export default function BasicNeeds() {
         ))}
         <button
           className="quadrant-btn bottom-right"
-          {...getNavigationProps('/patient/basic-needs/other')}
+          disabled={isLoading}
+          {...(isLoading ? {} : getNavigationProps('/patient/basic-needs/other'))}
         >
           Other
         </button>

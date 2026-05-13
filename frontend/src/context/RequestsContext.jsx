@@ -51,6 +51,7 @@ const mapBackendRequest = (backendReq, source, requestText) => {
     id: String(backendReq.id),
     patient_id: backendReq.patient_id,
     patient_name: backendReq.patient_name || null,
+    patient_cnp: backendReq.patient_cnp || null,
     patientDisplayName: backendReq.patient_name || 'Unknown patient',
     path: path,
     status: backendReq.status,

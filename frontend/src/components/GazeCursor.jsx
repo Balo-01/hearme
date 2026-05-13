@@ -143,14 +143,19 @@ export default function GazeCursor() {
     }
 
     activeTargetRef.current = target;
-    target.classList.add('gaze-dwell-active');
-    target.style.setProperty('--dwell-delay', `${DWELL_DELAY_MS}ms`);
 
+    // Delay 1s before applying hover/mărire effect, then start dwell timer
     dwellTimerRef.current = setTimeout(() => {
-      const targetToActivate = activeTargetRef.current;
-      clearActiveTarget();
-      targetToActivate?.click();
-    }, DWELL_DELAY_MS);
+      if (activeTargetRef.current !== target) return;
+      target.classList.add('gaze-dwell-active');
+      target.style.setProperty('--dwell-delay', `${DWELL_DELAY_MS}ms`);
+
+      dwellTimerRef.current = setTimeout(() => {
+        const targetToActivate = activeTargetRef.current;
+        clearActiveTarget();
+        targetToActivate?.click();
+      }, DWELL_DELAY_MS);
+    }, 1000);
   }, [state, gazePosition, gazeValid, isBlinking, isModalOpen, clearActiveTarget]);
 
   // Hide cursor when blinking or not tracking

@@ -32,7 +32,8 @@ export default function Communication() {
         ))}
         <button
           className="quadrant-btn bottom-right"
-          {...getNavigationProps('/patient/communication/other')}
+          disabled={isLoading}
+          {...(isLoading ? {} : getNavigationProps('/patient/communication/other'))}
         >
           Other
         </button>

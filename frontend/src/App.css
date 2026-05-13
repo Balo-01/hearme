@@ -270,42 +270,9 @@
   margin: 2px 4px;
 }
 
-.nurse-filter-toggle-btn,
-.nurse-filter-apply-btn,
-.nurse-filter-clear-btn {
-  border: 1px solid rgba(29, 70, 121, 0.25);
-  border-radius: 8px;
-  padding: 6px 10px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.nurse-filter-toggle-btn,
-.nurse-filter-apply-btn {
-  background: #eaf3ff;
-  color: #1e4f8f;
-  border-color: rgba(45, 109, 188, 0.35);
-}
-
-.nurse-filter-toggle-btn:hover,
-.nurse-filter-apply-btn:hover {
-  background: #deedff;
-}
-
-.nurse-filter-clear-btn {
-  background: #f3f5f8;
-  color: #3f4f85;
-  border-color: rgba(63, 79, 133, 0.3);
-}
-
-.nurse-filter-clear-btn:hover {
-  background: #e8edf7;
-}
-
 .nurse-filter-controls {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -360,11 +327,11 @@
   left: 27px;
 }
 
-.nurse-filter-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 8px;
-  margin: 0 4px 10px;
+.nurse-search-row {
+  margin: 0 4px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .nurse-filter-input {
@@ -382,6 +349,32 @@
   color: #2a4d79;
   font-size: 0.8rem;
   font-weight: 700;
+}
+
+.nurse-search-meta {
+  color: #2a4d79;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.nurse-search-matches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nurse-search-match-btn {
+  border: 1px solid rgba(45, 109, 188, 0.3);
+  background: #eef5ff;
+  color: #204d84;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.nurse-search-match-btn:hover {
+  background: #e2efff;
 }
 
 .nurse-request-list {

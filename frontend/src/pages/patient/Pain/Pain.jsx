@@ -29,7 +29,8 @@ export default function Pain() {
         ))}
         <button
           className="quadrant-btn bottom-right"
-          {...getNavigationProps('/patient/pain/other')}
+          disabled={isLoading}
+          {...(isLoading ? {} : getNavigationProps('/patient/pain/other'))}
         >
           Other
         </button>

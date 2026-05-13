@@ -5,12 +5,10 @@ import { useRequests } from '../../context/RequestsContext.jsx';
 export default function Nurse() {
   const { requests, dismissRequest } = useRequests();
   const [selectedRequestId, setSelectedRequestId] = useState(null);
-  const [showPatientFilter, setShowPatientFilter] = useState(false);
-  const [patientIdInput, setPatientIdInput] = useState('');
-  const [activePatientIdFilter, setActivePatientIdFilter] = useState('');
+  const [patientCnpSearch, setPatientCnpSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('active');
 
-  const normalizedActiveFilter = activePatientIdFilter.trim().toLowerCase();
+  const normalizedCnpSearch = patientCnpSearch.trim().toLowerCase();
 
   const sortedRequests = useMemo(() => {
     return [...requests].sort((left, right) => {
@@ -24,17 +22,45 @@ export default function Nurse() {
     });
   }, [requests]);
 
-  const filteredRequests = useMemo(() => {
-    let result = sortedRequests.filter((request) => request.status === statusFilter);
+  const statusScopedRequests = useMemo(
+    () => sortedRequests.filter((request) => request.status === statusFilter),
+    [sortedRequests, statusFilter],
+  );
 
-    if (!normalizedActiveFilter) {
-      return result;
+  const filteredRequests = useMemo(() => {
+    if (!normalizedCnpSearch) {
+      return statusScopedRequests;
     }
 
-    return result.filter(
-      (request) => String(request.patient_id).trim().toLowerCase() === normalizedActiveFilter,
+    return statusScopedRequests.filter(
+      (request) => String(request.patient_cnp || '').trim().toLowerCase().startsWith(normalizedCnpSearch),
     );
-  }, [sortedRequests, normalizedActiveFilter, statusFilter]);
+  }, [statusScopedRequests, normalizedCnpSearch]);
+
+  const matchingPatients = useMemo(() => {
+    if (!normalizedCnpSearch) {
+      return [];
+    }
+
+    const uniquePatients = new Map();
+    statusScopedRequests.forEach((request) => {
+      const cnp = String(request.patient_cnp || '').trim();
+      if (!cnp) {
+        return;
+      }
+      if (!cnp.toLowerCase().startsWith(normalizedCnpSearch)) {
+        return;
+      }
+      if (!uniquePatients.has(cnp)) {
+        uniquePatients.set(cnp, {
+          cnp,
+          name: request.patientDisplayName,
+        });
+      }
+    });
+
+    return Array.from(uniquePatients.values()).slice(0, 6);
+  }, [statusScopedRequests, normalizedCnpSearch]);
 
   const selectedRequest = useMemo(
     () => filteredRequests.find((request) => request.id === selectedRequestId) || filteredRequests[0] || null,
@@ -43,18 +69,6 @@ export default function Nurse() {
 
   const handleResolveRequest = (resolvedRequestId) => {
     dismissRequest(resolvedRequestId);
-  };
-
-  const applyPatientFilter = () => {
-    const normalizedValue = patientIdInput.trim();
-    setActivePatientIdFilter(normalizedValue);
-    setSelectedRequestId(null);
-  };
-
-  const clearPatientFilter = () => {
-    setPatientIdInput('');
-    setActivePatientIdFilter('');
-    setSelectedRequestId(null);
   };
 
   return (
@@ -83,50 +97,44 @@ export default function Nurse() {
                   <span className="nurse-toggle-handle" />
                 </button>
               </div>
-              <button
-                type="button"
-                className="nurse-filter-toggle-btn"
-                onClick={() => setShowPatientFilter((previous) => !previous)}
-              >
-                Filter by patient
-              </button>
             </div>
           </div>
-          {showPatientFilter ? (
-            <div className="nurse-filter-row">
-              <input
-                type="text"
-                className="nurse-filter-input"
-                placeholder="Enter patient ID"
-                value={patientIdInput}
-                onChange={(event) => setPatientIdInput(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    applyPatientFilter();
-                  }
-                }}
-              />
-              <button
-                type="button"
-                className="nurse-filter-apply-btn"
-                onClick={applyPatientFilter}
-              >
-                Apply
-              </button>
-              <button
-                type="button"
-                className="nurse-filter-clear-btn"
-                onClick={clearPatientFilter}
-              >
-                Clear
-              </button>
+          <div className="nurse-search-row">
+            <input
+              type="text"
+              className="nurse-filter-input"
+              placeholder="Search by patient CNP"
+              value={patientCnpSearch}
+              onChange={(event) => {
+                const numericValue = event.target.value.replace(/\D/g, '').slice(0, 13);
+                setPatientCnpSearch(numericValue);
+                setSelectedRequestId(null);
+              }}
+              maxLength={13}
+            />
+            <div className="nurse-search-meta">
+              {patientCnpSearch.length > 0
+                ? `${patientCnpSearch.length}/13 digits`
+                : 'Type a CNP to filter requests'}
             </div>
-          ) : null}
-          {normalizedActiveFilter ? (
-            <div className="nurse-filter-active-note">
-              Showing requests for patient ID: {activePatientIdFilter}
-            </div>
-          ) : null}
+            {matchingPatients.length > 0 ? (
+              <div className="nurse-search-matches">
+                {matchingPatients.map((patient) => (
+                  <button
+                    key={patient.cnp}
+                    type="button"
+                    className="nurse-search-match-btn"
+                    onClick={() => {
+                      setPatientCnpSearch(patient.cnp);
+                      setSelectedRequestId(null);
+                    }}
+                  >
+                    {patient.name} - {patient.cnp}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
           <div className="nurse-request-list">
             {filteredRequests.map((request) => {
               const isActive = request.id === selectedRequest?.id;
@@ -140,7 +148,7 @@ export default function Nurse() {
                   <div className="nurse-request-item-top">
                     <div className="nurse-patient-lines">
                       <span>Patient: {request.patientDisplayName}</span>
-                      <span className="nurse-patient-id-line">ID: {request.patient_id}</span>
+                      <span className="nurse-patient-id-line">CNP: {request.patient_cnp || 'Unknown'}</span>
                     </div>
                     <span>{request.createdAt}</span>
                   </div>
@@ -171,8 +179,8 @@ export default function Nurse() {
             })}
             {filteredRequests.length === 0 ? (
               <div className="nurse-empty-state">
-                {normalizedActiveFilter
-                  ? `No ${statusFilter === 'active' ? 'unresolved' : 'resolved'} requests found for this patient ID.`
+                {normalizedCnpSearch
+                  ? `No ${statusFilter === 'active' ? 'unresolved' : 'resolved'} requests found for this patient CNP.`
                   : `No ${statusFilter === 'active' ? 'unresolved' : 'resolved'} requests.`}
               </div>
             ) : null}
