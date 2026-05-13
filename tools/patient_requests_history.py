@@ -56,7 +56,6 @@ def get_patient_requests(patient_id, request_type, connection=None):
         requests = cursor.fetchall()
 
         result = {
-            "patient_id": patient_id,
             "request_type": request_type,
             "requests": []
         }
