@@ -1,140 +1,122 @@
-# HearMe - Database Setup and Usage
+# HearMe
 
-## Project Overview
+HearMe is an eye-tracking-powered communication aid for non-verbal hospital patients. Patients use webcam gaze to navigate menus and submit requests (pain, basic needs, communication). The nurse dashboard shows incoming requests with AI-generated context about why those options were recommended for the patient.
 
-This project uses an Oracle database to store patient-related data for:
+---
 
-- demographics (patients)
-- clinical history (conditions, procedures, observations, medications, allergies)
-- patient support requests (requests)
+## Architecture
 
-The Python scripts in the repository query these tables and return structured dictionaries for:
+| Component | Location | Description |
+|---|---|---|
+| Oracle DB | Docker | Stores patients, medical history, requests |
+| FastAPI backend | `backend/server.py` | REST API for requests and AI recommendations |
+| Recommendation agent | `agent/recommendation_agent.py` | GPT-4o-mini integration |
+| React frontend | `frontend/` | Patient menus + nurse dashboard |
+| EyeTrax gaze server | `eyetrax/` | WebSocket webcam eye-tracking |
 
-- complete medical history: patient_medical_history.py
-- request history by request type: patient_requests_history.py
-
-## Database Schema
-
-The schema is created from database/create_database.sql and includes the following tables:
-
-- patients: patient master data
-- procedures: procedures performed for a patient
-- observations: measured or reported observations
-- medications: medication intervals and reasons
-- conditions: diagnosis/history conditions
-- allergies: allergy records
-- requests: patient requests with type and timestamp
-
-All child tables are linked to patients using foreign keys.
+---
 
 ## Prerequisites
 
-- Docker Desktop (or Docker Engine)
+- Docker Desktop
 - Python 3.10+
-- Access to SQLcl or another Oracle SQL client
+- Node.js 18+
+- OpenAI API key
 
-## Step 1 - Start Oracle with Docker
+---
 
-From the repository root, run:
+## Step 1 — Start Oracle with Docker
 
 ```powershell
 docker compose up -d
 ```
 
-This starts Oracle Free using docker-compose.yml and exposes:
+Exposes port `1521` for SQL connections. Wait until the container is healthy.
 
-- port 1521 for SQL connections
-- port 5500 for Oracle management
+---
 
-Wait until the container health check reports healthy.
+## Step 2 — Create the Database Schema
 
-## Step 2 - Create Tables
+Connect to Oracle and run:
 
-Create a user, connect to the database and run:
+```sql
+database/create_database.sql
+```
 
-- database/create_database.sql
+Tables created: `patients`, `conditions`, `procedures`, `medications`, `allergies`, `requests`.
 
-This creates all tables and constraints required by the ETL and query scripts.
+The `requests` table includes an `ai_summary CLOB` column that stores the AI-generated context at request creation time.
 
-## Step 3 - Configure Environment Variables
+---
 
-Create a .env file in the repository root with values like:
+## Step 3 — Configure Environment Variables
+
+Create a `.env` file in the repository root:
 
 ```dotenv
 DB_USER=your_username
 DB_PASSWORD=your_password
 DB_DSN=localhost:1521/FREEPDB1
 CSV_PATH=database/csv/
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-## Step 4 - Install Python Dependencies
+---
 
-From the repository root:
+## Step 4 — Install Python Dependencies
 
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r database/requirements.txt
+pip install -r requirements.txt
 ```
 
-## Step 5 - Load Data into the Database
+---
 
-Run the ETL script:
+## Step 5 — Load Patient Data
 
 ```powershell
 py .\database\etl_script.py
 ```
 
-What ETL does:
+Inserts up to 15 patients with their conditions, procedures, medications, and allergies from the CSV files in `database/csv/`.
 
-- inserts up to 15 patients (MAX_NUMBER_OF_PATIENTS)
-- inserts related procedures, observations, medications, conditions, and allergies
-- applies a +5 year offset to source dates (DATE_YEAR_OFFSET)
-- skips procedure rows whose description contains medication reconciliation
+---
 
-## Step 6 - Run Query Scripts
-
-Medical history example:
+## Step 6 — Run Everything
 
 ```powershell
-py .\patient_medical_history.py
+.\start-hearme.ps1
 ```
 
-Patient requests example:
+This script starts:
+1. The EyeTrax gaze WebSocket server (`ws://localhost:8765`)
+2. The Vite React frontend (`http://localhost:5173`)
+
+Start the FastAPI backend separately:
 
 ```powershell
-py .\patient_requests_history.py
+cd backend
+uvicorn server:app --reload
 ```
 
-You can also run database/populate_requests.sql if you want to add test data into the requests table.
+Backend runs at `http://localhost:8000`. Swagger docs at `http://localhost:8000/docs`.
 
-## Step 7 - Configure the Recommendation Agent
+---
 
-Add your OpenAI API key to the `.env` file:
+## Recommendation Agent
 
-```dotenv
-OPENAI_API_KEY=your_openai_api_key
-```
+The agent (`agent/recommendation_agent.py`) is called once when a patient submits a request. It uses the patient's medical history and past request patterns to recommend the 3 most relevant options and generate a summary explaining the reasoning.
 
-Install agent dependencies:
-
-```powershell
-pip install -r requirements.txt
-```
-
-## Agent Logic
-
-The recommendation agent is in `agent/recommendation_agent.py` and exposes a single function:
+### Function
 
 ```python
 get_recommendations(patient_id: str, category: str) -> dict
 ```
 
-It returns exactly 3 recommendations for the given patient and category.
-
 ### Categories
 
-| Category | Valid options |
+| Category | Options |
 |---|---|
 | `pain` | head pain, back pain, stomach pain |
 | `basic_needs` | water, food, toilet, blanket, temperature, lighting, body position |
@@ -142,22 +124,26 @@ It returns exactly 3 recommendations for the given patient and category.
 
 ### How it works
 
-1. The agent sends the patient ID and category to `gpt-4o-mini` with two tool definitions:
-   - `get_patient_medical_history` — fetches conditions, procedures, observations, medications, allergies
-   - `get_patient_requests_history` — fetches the summarized request history for the given category
-2. For `pain`, the model calls both tools. For `basic_needs` and `communication`, it calls request history only.
-3. The model uses the fetched data and the predefined option list for the category to pick the 3 most relevant recommendations.
-4. The response is parsed from JSON and validated to contain exactly 3 items.
-
-### Output shape
+1. For `pain`: fetches the patient's full medical history (conditions, procedures, medications, allergies) and their past pain request history.
+2. For `basic_needs` / `communication`: fetches past request history for that category only.
+3. Sends data to `gpt-4o-mini` and asks for exactly 3 recommendations plus a summary explaining the reasoning.
+4. Returns JSON with shape:
 
 ```json
 {
   "patient_id": "...",
   "category": "pain",
-  "recommendations": ["head pain", "back pain", "stomach pain"]
+  "recommendations": ["head pain", "stomach pain", "back pain"],
+  "summary": "The patient has a history of sinusitis and has previously reported head pain most frequently..."
 }
 ```
+
+### LLM call lifecycle
+
+- Called once via `GET /recommendations` when the patient page loads (to populate the button options).
+- The frontend stores the returned `summary` in context.
+- When the patient confirms and submits a request, the summary is passed in the `POST /requests` body and stored in the `ai_summary` DB column — **no second LLM call**.
+- The nurse dashboard reads `ai_summary` directly from the stored request.
 
 ### Test the agent
 
@@ -166,39 +152,66 @@ py tests/test_recommendation_agent.py
 py tests/test_recommendation_agent.py <patient_uuid> <category>
 ```
 
-## Step 8 - Run the FastAPI Backend
+---
 
-The frontend calls this backend over HTTP for request submission, nurse dashboard polling, and AI recommendations.
+## Backend API
 
-Start the API from the repository root:
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `GET` | `/recommendations` | Get 3 AI recommendations + summary for a patient/category |
+| `GET` | `/requests` | List requests (query: `status=active\|done\|all`, `cnp=...`) |
+| `POST` | `/requests` | Submit a new patient request |
+| `PATCH` | `/requests/{id}/dismiss` | Resolve a request |
 
-```powershell
-python -m uvicorn backend.server:app --reload
-```
-
-The backend runs at:
-
-- http://localhost:8000
-- http://localhost:8000/docs for Swagger UI
-
-Request API examples:
+Example calls:
 
 ```powershell
-Invoke-RestMethod -Method Post -Uri http://localhost:8000/requests -ContentType "application/json" -Body '{"patient_id":"10339b10-3cd1-4ac3-ac13-ec26728cb592","path":["pain","severe"]}'
-Invoke-RestMethod -Uri "http://localhost:8000/requests?status=active"
-Invoke-RestMethod -Method Patch -Uri http://localhost:8000/requests/1/dismiss
+# Submit a request
+Invoke-RestMethod -Method Post -Uri http://localhost:8000/requests `
+  -ContentType "application/json" `
+  -Body '{"patient_id":"10339b10-3cd1-4ac3-ac13-ec26728cb592","path":["pain","head","mild"]}'
+
+# Get recommendations
 Invoke-RestMethod -Uri "http://localhost:8000/recommendations?patient_id=10339b10-3cd1-4ac3-ac13-ec26728cb592&category=basic_needs"
+
+# List active requests
+Invoke-RestMethod -Uri "http://localhost:8000/requests?status=active"
+
+# Dismiss a request
+Invoke-RestMethod -Method Patch -Uri http://localhost:8000/requests/1/dismiss
 ```
 
-For local frontend development, CORS is enabled for:
+CORS is enabled for `http://localhost:3000` and `http://localhost:5173`. Override with a comma-separated `CORS_ORIGINS` value in `.env`.
 
-- http://localhost:3000
-- http://localhost:5173
+---
 
-Override this with a comma-separated CORS_ORIGINS value in .env if needed.
-# HearMe Eye Tracking Frontend
+## Frontend
 
-HearMe combines a React patient/nurse communication frontend with EyeTrax webcam gaze tracking. Patients calibrate eye tracking, then navigate large menu options by holding gaze on the relevant direction/button.
+The React frontend (`frontend/`) has two sides:
+
+**Patient flow** (gaze-navigated):
+1. Calibration screen (9-point + 3-point Kalman fine tuning)
+2. Home → category selection (Pain / Basic Needs / Communication / Emergency)
+3. Sub-options populated by AI recommendations, with fallbacks
+4. Confirmation screen → request submitted
+
+**Nurse dashboard** (`/nurse`):
+- Lists incoming requests, filterable by status and patient CNP
+- Detail panel shows the original request, AI-rephrased version, and the **AI context** (the stored summary explaining why those options were recommended for this patient)
+
+---
+
+## Eye Tracking
+
+EyeTrax (`eyetrax/`) provides webcam gaze tracking over a WebSocket:
+
+- Setup screen validates face position, lighting, and head alignment
+- 9-point calibration followed by 3-point Kalman filter tuning
+- Gaze cursor overlay on patient menus
+- 3-second dwell on a button activates it
+- Press `R` to recalibrate
+
 
 ## Project Structure
 
