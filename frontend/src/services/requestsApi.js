@@ -12,13 +12,14 @@ export async function getActiveRequests() {
   return response.json();
 }
 
-export async function createRequest(patientId, path) {
+export async function createRequest(patientId, path, aiSummary) {
   const response = await fetch(`${API_BASE_URL}/requests`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       patient_id: patientId,
       path: Array.isArray(path) ? path : [path],
+      ai_summary: aiSummary || null,
     }),
   });
 
