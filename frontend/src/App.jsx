@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Home from './pages/patient/Home';
 import BasicNeeds from './pages/patient/BasicNeeds/BasicNeeds';
 import BasicNeedsOther from './pages/patient/BasicNeeds/BasicNeedsOther';
@@ -20,17 +20,33 @@ import PatientIdModal from './components/PatientIdModal';
 import { useEyeTracking, TrackingState } from './context/EyeTrackingContext';
 import { useModal } from './context/ModalContext';
 
+const GAZE_CAMERA_ROUTES = new Set([
+  '/patient',
+  '/patient/basic-needs',
+  '/patient/basic-needs/other',
+  '/patient/communication',
+  '/patient/communication/other',
+  '/patient/pain',
+  '/patient/pain/other',
+  '/patient/pain/intensity',
+  '/patient/final-answer',
+]);
+const HIDE_GAZE_CAMERA_PREVIEW_EVENT = 'hearme:hide-gaze-camera-preview';
+
 function App() {
-  const { state } = useEyeTracking();
+  const { state, cameraPreview, checkFace } = useEyeTracking();
   const { isModalOpen, setIsModalOpen } = useModal();
   const location = useLocation();
+  const [showCameraPreview, setShowCameraPreview] = useState(false);
   const isPatientHomeRoute = location.pathname === '/patient';
+  const isNurseRoute = location.pathname === '/nurse';
 
   const showCalibration =
     state === TrackingState.DISCONNECTED ||
     state === TrackingState.PRE_CALIBRATION ||
     state === TrackingState.CALIBRATING;
   const canOpenPatientModal = state === TrackingState.TRACKING && isPatientHomeRoute;
+  const isGazePage = !isNurseRoute && state === TrackingState.TRACKING && GAZE_CAMERA_ROUTES.has(location.pathname);
 
   // Listen for 'P' key to open patient ID modal
   useEffect(() => {
@@ -55,7 +71,49 @@ function App() {
     }
   }, [canOpenPatientModal, isModalOpen, setIsModalOpen]);
 
-  const isNurseRoute = location.pathname === '/nurse';
+  useEffect(() => {
+    if (!isGazePage) {
+      setShowCameraPreview(false);
+    }
+  }, [isGazePage]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (isModalOpen || !isGazePage) {
+        return;
+      }
+
+      if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault();
+        setShowCameraPreview((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isGazePage, isModalOpen]);
+
+  useEffect(() => {
+    if (!showCameraPreview || !isGazePage || isModalOpen) {
+      return undefined;
+    }
+
+    checkFace();
+    const intervalId = setInterval(() => {
+      checkFace();
+    }, 500);
+
+    return () => clearInterval(intervalId);
+  }, [showCameraPreview, isGazePage, isModalOpen, checkFace]);
+
+  useEffect(() => {
+    const handleHideCameraPreview = () => {
+      setShowCameraPreview(false);
+    };
+
+    window.addEventListener(HIDE_GAZE_CAMERA_PREVIEW_EVENT, handleHideCameraPreview);
+    return () => window.removeEventListener(HIDE_GAZE_CAMERA_PREVIEW_EVENT, handleHideCameraPreview);
+  }, []);
 
   return (
     <>
@@ -72,6 +130,21 @@ function App() {
       {!isNurseRoute && <CalibrationScreen />}
       {!isNurseRoute && state === TrackingState.TRACKING && <GazeCursor />}
       {!isNurseRoute && state === TrackingState.TRACKING && <RecalibrateButton />}
+      {!isNurseRoute && isGazePage && showCameraPreview && (
+        <div className="gaze-webcam-preview">
+          {cameraPreview ? (
+            <img
+              className="gaze-webcam-preview-image"
+              src={cameraPreview}
+              alt="Webcam preview"
+            />
+          ) : (
+            <div className="gaze-webcam-preview-placeholder">
+              Waiting for webcam preview...
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Routes */}
       <Routes>

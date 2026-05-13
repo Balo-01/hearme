@@ -5,25 +5,55 @@ from contextlib import contextmanager
 import cv2
 
 
-def open_camera(index: int = 0) -> cv2.VideoCapture:
+def open_camera_with_index(
+    index: int = 0,
+    *,
+    allow_fallback: bool = True,
+) -> tuple[cv2.VideoCapture, int]:
     """
-    Open a camera by index.
+    Open a camera by index and return both the capture object and the actual
+    opened index.
 
     Compatibility fallback: if camera 0 fails to open, try camera 1.
     """
     cap = cv2.VideoCapture(index)
     if cap.isOpened():
-        return cap
+        return cap, index
 
     cap.release()
-    if index == 0:
+    if allow_fallback and index == 0:
         cap = cv2.VideoCapture(1)
         if cap.isOpened():
-            return cap
+            return cap, 1
         cap.release()
         raise RuntimeError("cannot open camera 0 (fallback to camera 1 also failed)")
 
     raise RuntimeError(f"cannot open camera {index}")
+
+
+def open_camera(
+    index: int = 0,
+    *,
+    allow_fallback: bool = True,
+) -> cv2.VideoCapture:
+    """
+    Open a camera by index.
+    """
+    cap, _ = open_camera_with_index(index, allow_fallback=allow_fallback)
+    return cap
+
+
+def list_available_cameras(max_index: int = 4) -> list[int]:
+    """
+    Probe a small range of camera indexes and return the ones that can be opened.
+    """
+    available = []
+    for index in range(max_index):
+        cap = cv2.VideoCapture(index)
+        if cap.isOpened():
+            available.append(index)
+        cap.release()
+    return available
 
 
 @contextmanager

@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useEyeTracking, TrackingState } from '../../context/EyeTrackingContext';
 import './Calibration.css';
 
@@ -56,16 +57,21 @@ function SetupCheck({ item, ok }) {
 }
 
 export default function PreCalibration() {
+  const location = useLocation();
   const {
     state,
     faceDetected,
     cameraPreview,
+    availableCameras,
+    activeCameraIndex,
+    cameraSwitching,
     setupChecks,
     setupReady,
     faceMetrics,
     error,
     startCalibration,
     checkFace,
+    setCamera,
   } = useEyeTracking();
 
   useEffect(() => {
@@ -103,6 +109,10 @@ export default function PreCalibration() {
   const metricsSummary = faceMetrics
     ? `Turn ${formatAngle(faceMetrics.yaw_degrees)} | Nod ${formatAngle(faceMetrics.pitch_degrees)} | Tilt ${formatAngle(faceMetrics.roll_degrees)}`
     : 'Waiting for face measurements';
+  const showCameraSwitcher =
+    location.pathname === '/patient' &&
+    state === TrackingState.PRE_CALIBRATION &&
+    availableCameras.length >= 2;
 
   return (
     <div className="calibration-overlay">
@@ -141,6 +151,24 @@ export default function PreCalibration() {
             <div className="eye-level-note">
               Best accuracy usually comes when your eyes sit inside the blue band, roughly level with the webcam.
             </div>
+            {showCameraSwitcher ? (
+              <div className="camera-switcher" aria-label="Camera selection">
+                <div className="camera-switcher-label">Gaze camera</div>
+                <div className="camera-switcher-buttons">
+                  {availableCameras.map((cameraIndex) => (
+                    <button
+                      key={cameraIndex}
+                      type="button"
+                      className={`camera-switcher-btn ${cameraIndex === activeCameraIndex ? 'active' : ''}`}
+                      onClick={() => setCamera(cameraIndex)}
+                      disabled={cameraSwitching || cameraIndex === activeCameraIndex}
+                    >
+                      Camera {cameraIndex + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </section>
 
           <section className="setup-panel" aria-label="Setup checks">

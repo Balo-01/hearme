@@ -201,6 +201,58 @@
   line-height: 1.35;
 }
 
+.camera-switcher {
+  margin-top: 0.9rem;
+  padding: 0.8rem 0.85rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.camera-switcher-label {
+  margin-bottom: 0.65rem;
+  color: #cbd5e1;
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.camera-switcher-buttons {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.camera-switcher-btn {
+  padding: 0.65rem 0.95rem;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(15, 23, 42, 0.55);
+  color: #dbeafe;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.camera-switcher-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(96, 165, 250, 0.5);
+  background: rgba(30, 41, 59, 0.75);
+}
+
+.camera-switcher-btn.active {
+  border-color: rgba(74, 222, 128, 0.55);
+  background: rgba(34, 197, 94, 0.14);
+  color: #bbf7d0;
+}
+
+.camera-switcher-btn:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
 .precalib-rules {
   text-align: left;
   display: flex;
@@ -617,39 +669,21 @@
   font-size: 0.85rem;
 }
 
-/* ===== Recalibrate Button ===== */
-.recalibrate-btn {
+.recalibrate-hint {
   position: fixed;
   top: 16px;
   right: 16px;
   z-index: 9999;
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #94a3b8;
-  background: rgba(30, 41, 59, 0.8);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  border-radius: 8px;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: background 0.2s, color 0.2s;
-}
-
-.recalibrate-btn:hover,
-.recalibrate-btn:focus,
-.recalibrate-btn.gaze-dwell-active {
-  background: rgba(51, 65, 85, 0.9);
-  color: #e2e8f0;
-  outline: 2px solid rgba(96, 165, 250, 0.5);
-}
-
-.recalibrate-hint {
-  position: fixed;
-  top: 52px;
-  right: 16px;
-  z-index: 9999;
-  font-size: 0.7rem;
-  color: #64748b;
+  padding: 0.55rem 0.95rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+  backdrop-filter: blur(6px);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #dbeafe;
+  text-shadow: 0 2px 10px rgba(15, 23, 42, 0.6);
 }
 
 @media (max-width: 860px) {

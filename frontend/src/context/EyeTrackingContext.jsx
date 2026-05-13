@@ -23,6 +23,9 @@ export function EyeTrackingProvider({ children }) {
   const [patientMoved, setPatientMoved] = useState(false);
   const [calibrationData, setCalibrationData] = useState(null);
   const [cameraPreview, setCameraPreview] = useState(null);
+  const [availableCameras, setAvailableCameras] = useState([]);
+  const [activeCameraIndex, setActiveCameraIndex] = useState(0);
+  const [cameraSwitching, setCameraSwitching] = useState(false);
   const [setupChecks, setSetupChecks] = useState(null);
   const [setupReady, setSetupReady] = useState(false);
   const [faceMetrics, setFaceMetrics] = useState(null);
@@ -99,6 +102,9 @@ export function EyeTrackingProvider({ children }) {
     switch (msg.type) {
       case 'connection':
         setState(msg.calibrated ? TrackingState.TRACKING : TrackingState.PRE_CALIBRATION);
+        setAvailableCameras(Array.isArray(msg.available_cameras) ? msg.available_cameras : []);
+        setActiveCameraIndex(Number.isInteger(msg.camera_index) ? msg.camera_index : 0);
+        setCameraSwitching(false);
         break;
 
       case 'gaze':
@@ -127,6 +133,7 @@ export function EyeTrackingProvider({ children }) {
 
       case 'error':
         setError(msg.message);
+        setCameraSwitching(false);
         break;
 
       default:
@@ -229,6 +236,21 @@ export function EyeTrackingProvider({ children }) {
     ws.send(JSON.stringify({ type: 'check_face' }));
   }, []);
 
+  const setCamera = useCallback((cameraIndex) => {
+    const ws = wsRef.current;
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      setError('Not connected to gaze server');
+      return;
+    }
+
+    setError(null);
+    setCameraSwitching(true);
+    ws.send(JSON.stringify({
+      type: 'set_camera',
+      camera_index: cameraIndex,
+    }));
+  }, []);
+
   useEffect(() => {
     const connectTimer = window.setTimeout(() => {
       connectRef.current?.();
@@ -261,6 +283,9 @@ export function EyeTrackingProvider({ children }) {
     patientMoved,
     calibrationData,
     cameraPreview,
+    availableCameras,
+    activeCameraIndex,
+    cameraSwitching,
     setupChecks,
     setupReady,
     faceMetrics,
@@ -268,6 +293,7 @@ export function EyeTrackingProvider({ children }) {
     startCalibration,
     recalibrate,
     checkFace,
+    setCamera,
   };
 
   return (

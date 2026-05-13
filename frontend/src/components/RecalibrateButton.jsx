@@ -1,19 +1,21 @@
 import { useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useEyeTracking, TrackingState } from '../context/EyeTrackingContext';
 import '../pages/calibration/Calibration.css';
 
 /**
- * Persistent recalibrate button shown during tracking.
- * Keyboard shortcut: R key triggers recalibration.
+ * Persistent recalibration hint shown during tracking.
+ * Keyboard shortcut: R returns the user to the setup screen, then recalibrates.
  */
 export default function RecalibrateButton() {
   const { state, recalibrate } = useEyeTracking();
+  const navigate = useNavigate();
 
   const handleRecalibrate = useCallback(() => {
+    navigate('/patient');
     recalibrate();
-  }, [recalibrate]);
+  }, [navigate, recalibrate]);
 
-  // Keyboard shortcut: R to recalibrate
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (state !== TrackingState.TRACKING) return;
@@ -28,17 +30,5 @@ export default function RecalibrateButton() {
 
   if (state !== TrackingState.TRACKING) return null;
 
-  return (
-    <>
-      <button
-        className="recalibrate-btn"
-        onClick={handleRecalibrate}
-        aria-label="Recalibrate eye tracking"
-        tabIndex={0}
-      >
-        ↺ Recalibrate
-      </button>
-      <span className="recalibrate-hint">Press R</span>
-    </>
-  );
+  return <span className="recalibrate-hint">Press R for recalibrate</span>;
 }

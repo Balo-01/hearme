@@ -1,3 +1,17 @@
+/* Shared sizing tokens so buttons and optional webcam preview scale together. */
+:root {
+  --quadrant-button-width: min(450px, 44vw);
+  --quadrant-button-height: clamp(240px, 32vh, 300px);
+  --quadrant-offset-x: clamp(26px, 4vw, 52px);
+  --quadrant-offset-y: clamp(26px, 5vh, 52px);
+  --gaze-preview-bottom-gap: clamp(6px, 1vh, 12px);
+  --gaze-preview-width: min(
+    calc(var(--quadrant-button-width) * 0.95),
+    calc(var(--quadrant-button-height) * 1.2667),
+    calc((var(--quadrant-button-height) - var(--gaze-preview-bottom-gap)) * 1.3333)
+  );
+}
+
 /* AI summary explaining why recommendations were chosen. */
 .recommendation-summary {
   position: fixed;
@@ -88,6 +102,41 @@
   inset: 0;
 }
 
+.gaze-webcam-preview {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--quadrant-offset-y) + var(--gaze-preview-bottom-gap));
+  transform: translateX(-50%);
+  width: var(--gaze-preview-width);
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 14px 30px rgba(15, 35, 66, 0.18);
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+  z-index: 12;
+}
+
+.gaze-webcam-preview-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.gaze-webcam-preview-placeholder {
+  padding: 14px;
+  color: #21436f;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 /* Shared visual style for all quadrant buttons. */
 .quadrant-btn {
   display: flex;
@@ -95,8 +144,8 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  width: min(450px, 44vw);
-  min-height: clamp(240px, 32vh, 300px);
+  width: var(--quadrant-button-width);
+  min-height: var(--quadrant-button-height);
   padding: 45px;
   border-radius: 28px;
   border: 1px solid rgba(255, 255, 255, 0.75);
@@ -134,29 +183,29 @@
 /* Top-left quadrant (Basic Needs). */
 .quadrant-btn.top-left {
   background: linear-gradient(140deg, #4a90e2 0%, #2d6dbc 100%);
-  top: clamp(26px, 5vh, 52px);
-  left: clamp(26px, 4vw, 52px);
+  top: var(--quadrant-offset-y);
+  left: var(--quadrant-offset-x);
 }
 
 /* Top-right quadrant (Communication). */
 .quadrant-btn.top-right {
   background: linear-gradient(140deg, #3fc1c9 0%, #2a8f95 100%);
-  top: clamp(26px, 5vh, 52px);
-  right: clamp(26px, 4vw, 52px);
+  top: var(--quadrant-offset-y);
+  right: var(--quadrant-offset-x);
 }
 
 /* Bottom-left quadrant (Pain). */
 .quadrant-btn.bottom-left {
   background: linear-gradient(140deg, #f0b44c 0%, #c6811f 100%);
-  bottom: clamp(26px, 5vh, 52px);
-  left: clamp(26px, 4vw, 52px);
+  bottom: var(--quadrant-offset-y);
+  left: var(--quadrant-offset-x);
 }
 
 /* Bottom-right quadrant (Emergency / Other actions). */
 .quadrant-btn.bottom-right {
   background: linear-gradient(140deg, #e06d74 0%, #ba3f48 100%);
-  bottom: clamp(26px, 5vh, 52px);
-  right: clamp(26px, 4vw, 52px);
+  bottom: var(--quadrant-offset-y);
+  right: var(--quadrant-offset-x);
 }
 
 .quadrant-btn:disabled {
@@ -634,9 +683,16 @@
 
 /* Mobile adjustments: keep buttons large and readable on smaller viewports. */
 @media (max-width: 860px) {
+  :root {
+    --quadrant-button-width: min(49vw, 290px);
+    --quadrant-button-height: 190px;
+    --gaze-preview-width: min(
+      calc(var(--quadrant-button-width) * 0.82),
+      calc(var(--quadrant-button-height) * 0.94)
+    );
+  }
+
   .quadrant-btn {
-    width: min(49vw, 290px);
-    min-height: 190px;
     padding: 20px;
     border-radius: 22px;
   }
