@@ -3,7 +3,7 @@ import useHoverNavigate from '../../hooks/useHoverNavigate';
 
 export default function Home() {
   // Home entry screen: 4 quadrants, each navigates after sustained hover.
-  const { getNavigationProps } = useHoverNavigate(3000);
+  const { getNavigationProps } = useHoverNavigate(4000);
 
   return (
     <>

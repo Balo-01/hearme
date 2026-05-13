@@ -33,15 +33,15 @@ export default function PatientIdModal({ isOpen, onClose }) {
       {/* Modal container */}
       <div className="patient-modal">
         <div className="patient-modal-content">
-          <h2 className="patient-modal-title">Enter Patient ID</h2>
-          <p className="patient-modal-subtitle">Please enter the patient ID to proceed</p>
+          <h2 className="patient-modal-title">Enter Patient CNP</h2>
+          <p className="patient-modal-subtitle">Please enter the patient CNP to proceed</p>
           
           <input
             type="text"
             className="patient-modal-input"
-            placeholder="Patient ID..."
+            placeholder="Patient CNP..."
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => setInputValue(e.target.value.replace(/\D/g, '').slice(0, 13))}
             onKeyDown={handleKeyDown}
             autoFocus
           />
