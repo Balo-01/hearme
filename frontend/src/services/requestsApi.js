@@ -1,5 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-export const DEFAULT_PATIENT_ID = '1d604da9-9a81-4ba9-80c2-de3375d59b40';
+export const DEFAULT_PATIENT_ID = '1960525268594';
 
 function isNetworkError(error) {
   return error instanceof TypeError;
