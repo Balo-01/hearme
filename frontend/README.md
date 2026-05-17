@@ -9,16 +9,14 @@ This folder contains the frontend application for HearMe, a patient-nurse commun
 	- Communication
 	- Pain (area + intensity)
 	- Emergency
-- Hover-based delayed navigation for selection confirmation.
-- Final confirmation screen with Yes and No logic.
+	- Button selection using only eye gaze, without the need for touch or click.
+	- Final confirmation screen with Yes and No logic.
 - Request sent feedback screen with timed redirect behavior.
-- Nurse dashboard mock:
-	- Request list (left)
-	- Selected request details (right)
-	- AI reformulation placeholder
-	- AI history/context placeholder
-	- Status lifecycle (pending / resolved)
-	- Access note: the page is currently available only by manually using /nurse in the browser URL.
+	- Nurse dashboard mock:
+		- Request list (left)
+		- On the right: the patient's request, detailed request, and an AI-generated summary based on both the patient's medical history and previous requests.
+		- Status lifecycle (pending / resolved)
+		- Access note: the page is currently available only by manually using /nurse in the browser URL.
 
 ## Run The App
 
